@@ -13,7 +13,8 @@
       "!**/dist",
       "!**/bun.lock",
       "!**/*.lock",
-      "!**/*.svg"
+      "!**/*.svg",
+      "!frontend/src/routeTree.gen.ts"
     ]
   },
   "formatter": {
