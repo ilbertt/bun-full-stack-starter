@@ -13,23 +13,25 @@
   },
   "scripts": {
     "backend": "bun --filter backend",
+    "backend:build": "bun backend build",
     "frontend": "bun --filter frontend",
     "frontend:dev": "bun frontend dev",
     "frontend:build": "bun frontend build",
+    "build": "bun frontend:build && bun backend:build",
     "check:types": "bun --filter \"*\" check:types",
     "check:codestyle": "bun run --bun biome check",
     "check:all": "bun check:types && bun check:codestyle",
     "fix:codestyle": "bun run --bun biome check --write"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.5",
+    "@biomejs/biome": "2.5.6",
     "@tanstack/router-plugin": "^1.168.23",
-    "@types/bun": "^1.3.14",
+    "bun-types": "canary",
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": "1.3.14",
+    "bun": "1.4.0",
     "node": "please use bun"
   },
-  "packageManager": "bun@1.3.14"
+  "packageManager": "bun@1.4.0"
 }

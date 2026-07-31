@@ -2,11 +2,19 @@
   "name": "backend",
   "type": "module",
   "private": true,
+  "imports": {
+    "#*": "./src/*"
+  },
   "scripts": {
+    "build": "bun build --compile ./src/main.ts --asset ../frontend/dist --outfile ./dist/app",
     "check:types": "bun run --bun tsc -b"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ilbertt/better-auth-bun-sql": "^0.2.0",
+    "better-auth": "^1.6.25"
+  },
   "devDependencies": {
+    "@better-auth/cli": "^1.4.21",
     "typescript": "catalog:"
   }
 }
