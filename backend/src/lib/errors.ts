@@ -57,8 +57,10 @@ export function elysiaErrorHandler({
   code,
   status,
 }: ErrorHandlerOptions): ErrorHandlerResult {
-  errorLogger.error(code, error);
   if (error instanceof AppError) {
+    if (error.statusCode >= StatusMap['Internal Server Error']) {
+      errorLogger.error(code, error);
+    }
     return status(error.statusCode, { error: error.message });
   }
   if (code === 'VALIDATION') {
@@ -67,5 +69,6 @@ export function elysiaErrorHandler({
   if (code === 'NOT_FOUND') {
     return status(StatusMap['Not Found'], { error: 'Not Found' });
   }
+  errorLogger.error(code, error);
   return status(StatusMap['Internal Server Error'], { error: 'Internal server error' });
 }

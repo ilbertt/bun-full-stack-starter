@@ -23,16 +23,20 @@ export const requestResponsePlugin = new Elysia({ name: 'request-response' })
     store.started = true;
   })
   .derive(() => ({ requestStartedAt: performance.now() }))
-  .onRequest(({ request, store }) => {
+  .onRequest(({ store }) => {
     if (!store.started) {
       return;
     }
-
-    httpLogger.info(`→ ${formatRequest(request)}`);
   })
   .onAfterResponse(({ request, set, requestStartedAt }) => {
     const status = resolveStatus(set.status);
     const elapsed = formatElapsed(requestStartedAt);
-    httpLogger.info(`← ${formatRequest(request)} ${status}${elapsed}`);
+    const response = `${formatRequest(request)} ${status}${elapsed}`;
+
+    let logger = httpLogger.info;
+    if (status >= StatusMap['Bad Request']) {
+      logger = httpLogger.error;
+    }
+    logger(response);
   })
   .as('global');
