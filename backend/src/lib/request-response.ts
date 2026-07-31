@@ -16,8 +16,18 @@ function formatElapsed(startedAt: number | undefined): string {
 }
 
 export const requestResponsePlugin = new Elysia({ name: 'request-response' })
+  // Registering a route that answers with a ready-made Response runs the request
+  // lifecycle against it once at startup, which isn't traffic worth logging.
+  .state('started', false)
+  .onStart(({ store }) => {
+    store.started = true;
+  })
   .derive(() => ({ requestStartedAt: performance.now() }))
-  .onRequest(({ request }) => {
+  .onRequest(({ request, store }) => {
+    if (!store.started) {
+      return;
+    }
+
     httpLogger.info(`→ ${formatRequest(request)}`);
   })
   .onAfterResponse(({ request, set, requestStartedAt }) => {
