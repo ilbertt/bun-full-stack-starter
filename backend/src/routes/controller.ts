@@ -1,14 +1,12 @@
 import { Elysia } from 'elysia';
 import { NotFoundError } from '#lib/errors.ts';
 import { RoutePrefix } from '#lib/routes/prefixes.ts';
-import { AssetsServicePlugin, assetsService } from '#services/plugins.ts';
+import { AssetsServicePlugin } from '#services/plugins.ts';
 
 function createRootController() {
   const controller = new Elysia().use(AssetsServicePlugin);
 
-  // A route per file, each answering with a ready-made Response. They're built
-  // before there's a context to read the service from.
-  for (const [path, response] of assetsService.routes()) {
+  for (const [path, response] of controller.decorator.assetsService.routes()) {
     controller.get(path, response);
   }
 

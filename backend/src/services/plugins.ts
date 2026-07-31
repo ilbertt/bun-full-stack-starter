@@ -9,7 +9,7 @@ import { HealthService } from '#services/health.service.ts';
 const assetsRepository = new AssetsRepository(sql);
 const healthRepository = new HealthRepository(sql);
 
-export const assetsService = new AssetsService(assetsRepository);
+const assetsService = new AssetsService(assetsRepository);
 const healthService = new HealthService(healthRepository);
 
 export function loggerPlugin(name: string) {
