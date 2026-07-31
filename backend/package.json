@@ -6,7 +6,8 @@
     "#*": "./src/*"
   },
   "scripts": {
-    "build": "bun build --compile ./src/main.ts --asset ../frontend/dist --outfile ./dist/app",
+    "dev": "bun run scripts/dev.ts",
+    "build": "bun run scripts/build.ts",
     "check:types": "bun run --bun tsc -b"
   },
   "dependencies": {

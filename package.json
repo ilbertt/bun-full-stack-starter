@@ -13,6 +13,7 @@
   },
   "scripts": {
     "backend": "bun --filter backend",
+    "backend:dev": "bun backend dev",
     "backend:build": "bun backend build",
     "frontend": "bun --filter frontend",
     "frontend:dev": "bun frontend dev",
