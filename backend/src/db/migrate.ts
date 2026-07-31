@@ -7,7 +7,7 @@ import { createLogger } from '#lib/logger.ts';
 /* Substituted at build time */
 declare const DB_MIGRATIONS_DIR_NAME: string;
 
-const logger = createLogger('migrate');
+const logger = createLogger('db/migrate');
 
 const MIGRATIONS_TABLE = '__migrations';
 const MIGRATIONS_DIR = join(import.meta.dir, DB_MIGRATIONS_DIR_NAME);
@@ -58,4 +58,6 @@ export async function runMigrations(): Promise<void> {
 
     await applyMigration({ db: sql, file });
   }
+
+  logger.info('migrations applied');
 }

@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-const BACKEND_DIR = import.meta.dir;
+const BACKEND_DIR = join(import.meta.dir, '..', '..');
 export const BACKEND_DIST_DIR = join(BACKEND_DIR, 'dist');
 export const BACKEND_BINARY_FILE = join(BACKEND_DIST_DIR, 'app');
 export const BACKEND_ENTRYPOINT = 'src/main.ts';
