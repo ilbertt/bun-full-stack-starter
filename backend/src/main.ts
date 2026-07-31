@@ -1,1 +1,3 @@
-console.log('Hello from backend');
+import { runMigrations } from '#db/migrate.ts';
+
+await runMigrations();
