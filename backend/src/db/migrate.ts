@@ -1,16 +1,12 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import type { SQL } from 'bun';
 import { sql } from '#db/client.ts';
+import { getMigrations } from '#lib/assets.ts';
 import { createLogger } from '#lib/logger.ts';
-
-/* Substituted at build time */
-declare const DB_MIGRATIONS_DIR_NAME: string;
 
 const logger = createLogger('db/migrate');
 
 const MIGRATIONS_TABLE = '__migrations';
-const MIGRATIONS_DIR = join(import.meta.dir, DB_MIGRATIONS_DIR_NAME);
+const MIGRATION_FILE_EXTENSION = '.sql';
 
 async function ensureMigrationsTable(db: SQL): Promise<void> {
   await db.unsafe(`
@@ -28,21 +24,23 @@ async function appliedMigrations(db: SQL): Promise<Set<string>> {
   return new Set(rows.map((row) => row.name));
 }
 
-function migrationFiles(): string[] {
-  return readdirSync(MIGRATIONS_DIR)
-    .filter((file) => file.endsWith('.sql'))
-    .sort();
-}
-
-async function applyMigration({ db, file }: { db: SQL; file: string }): Promise<void> {
-  const ddl = readFileSync(join(MIGRATIONS_DIR, file), 'utf8');
+async function applyMigration({
+  db,
+  name,
+  file,
+}: {
+  db: SQL;
+  name: string;
+  file: Blob;
+}): Promise<void> {
+  const ddl = await file.text();
 
   await db.begin(async (tx) => {
     await tx.unsafe(ddl);
-    await tx.unsafe(`INSERT INTO ${MIGRATIONS_TABLE} (name) VALUES ($1)`, [file]);
+    await tx.unsafe(`INSERT INTO ${MIGRATIONS_TABLE} (name) VALUES ($1)`, [name]);
   });
 
-  logger.info(`applied: ${file}`);
+  logger.info(`applied: ${name}`);
 }
 
 // Migrations run once at startup, on the same client the app uses: SQLite is a
@@ -51,12 +49,12 @@ export async function runMigrations(): Promise<void> {
   await ensureMigrationsTable(sql);
   const applied = await appliedMigrations(sql);
 
-  for (const file of migrationFiles()) {
-    if (applied.has(file)) {
+  for (const [name, file] of getMigrations()) {
+    if (!name.endsWith(MIGRATION_FILE_EXTENSION) || applied.has(name)) {
       continue;
     }
 
-    await applyMigration({ db: sql, file });
+    await applyMigration({ db: sql, name, file });
   }
 
   logger.info('migrations applied');
