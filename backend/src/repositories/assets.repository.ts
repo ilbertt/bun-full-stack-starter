@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ensureDir } from '#lib/filesystem.ts';
 import { Repository } from '#repositories/repository.ts';
@@ -36,8 +37,11 @@ function getEmbeddedAssets(): StaticAssetsMap {
   for (const file of Bun.embeddedFiles) {
     // @ts-expect-error: Bun types are not updated
     const path: string = file.name;
-    const assetPath = `/${path.slice(EMBEDDED_PREFIX.length)}`;
-    assets.set(assetPath, file);
+    // The binary embeds the migrations too, which must not be served.
+    if (path.startsWith(EMBEDDED_PREFIX)) {
+      const assetPath = `/${path.slice(EMBEDDED_PREFIX.length)}`;
+      assets.set(assetPath, file);
+    }
   }
   return assets;
 }
@@ -51,7 +55,10 @@ function getAssets(): StaticAssetsMap {
   for (const entry of entries) {
     const assetServePath = `/${entry}`;
     const assetFilePath = join(PUBLIC_FRONTEND_DIR, entry);
-    const assetBlob = Bun.file(assetFilePath);
+    // Read eagerly, like the embedded files: a static route can't stream a lazy
+    // BunFile, it needs the body in memory.
+    const assetType = Bun.file(assetFilePath).type;
+    const assetBlob = new Blob([readFileSync(assetFilePath)], { type: assetType });
     assets.set(assetServePath, assetBlob);
   }
   return assets;
