@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { HealthStatus } from '../components/health-status';
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -26,6 +27,7 @@ function RootComponent() {
         >
           About
         </Link>
+        <HealthStatus />
       </div>
       <hr />
       <Outlet />
