@@ -36,6 +36,16 @@ function RouteComponent() {
         >
           About
         </Link>
+        {session && (
+          <Link
+            to="/files"
+            activeProps={{
+              className: 'font-bold',
+            }}
+          >
+            Files
+          </Link>
+        )}
         <HealthStatus />
         <div className="ml-auto flex items-center gap-3 text-base">
           {session ? (
