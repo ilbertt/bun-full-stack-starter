@@ -1,6 +1,7 @@
 import { cp, rm } from 'node:fs/promises';
 import {
   BACKEND_BINARY_FILE,
+  BACKEND_BUILD_TARGET,
   BACKEND_DIST_DIR,
   BACKEND_ENTRYPOINT,
   DB_MIGRATIONS_DIR,
@@ -21,11 +22,13 @@ await rm(FRONTEND_DIST_DST, { recursive: true, force: true });
 console.log('📄 Copying frontend assets...');
 await cp(FRONTEND_DIST_SRC, FRONTEND_DIST_DST, { recursive: true });
 
-console.log('🔨 Compiling binary...');
+console.log(`🔨 Compiling binary for ${BACKEND_BUILD_TARGET ?? 'the host platform'}...`);
 const buildResult = await Bun.build({
   entrypoints: [BACKEND_ENTRYPOINT],
   compile: {
     outfile: BACKEND_BINARY_FILE,
+    // omitted entirely (not set to undefined) so Bun falls back to the host platform
+    ...(BACKEND_BUILD_TARGET ? { target: BACKEND_BUILD_TARGET } : {}),
     // @ts-expect-error: assets is still not in the types
     assets: [FRONTEND_DIST_DST, DB_MIGRATIONS_DIR],
   },
