@@ -10,8 +10,15 @@ const LEVEL_STYLES: Record<string, string> = {
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-// biome-ignore lint/complexity/useMaxParams: enable casting args inline
-function write(level: LogLevel, prefix: string, ...args: unknown[]): void {
+function write({
+  level,
+  prefix,
+  args,
+}: {
+  level: LogLevel;
+  prefix: string;
+  args: unknown[];
+}): void {
   const ts = new Date().toISOString();
   const style = LEVEL_STYLES[level] ?? '';
   const tag = `${style}${level.toUpperCase().padEnd(LABEL_WIDTH)}${RESET}`;
@@ -23,16 +30,16 @@ function write(level: LogLevel, prefix: string, ...args: unknown[]): void {
 export function createLogger(prefix = '') {
   return {
     debug(...args: unknown[]) {
-      write('debug', prefix, ...args);
+      write({ level: 'debug', prefix, args });
     },
     info(...args: unknown[]) {
-      write('info', prefix, ...args);
+      write({ level: 'info', prefix, args });
     },
     warn(...args: unknown[]) {
-      write('warn', prefix, ...args);
+      write({ level: 'warn', prefix, args });
     },
     error(...args: unknown[]) {
-      write('error', prefix, ...args);
+      write({ level: 'error', prefix, args });
     },
   };
 }

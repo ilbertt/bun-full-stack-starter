@@ -68,6 +68,9 @@ function readFolder(folder: string): AssetFiles {
 
 // Migrations run in name order, and neither source promises one.
 function sortedByPath(files: AssetFiles): AssetFiles {
-  // biome-ignore lint/complexity/useMaxParams: a comparator compares two entries
-  return new Map([...files].sort(([a], [b]) => (a < b ? -1 : 1)));
+  const sorted: AssetFiles = new Map();
+  for (const path of [...files.keys()].sort()) {
+    sorted.set(path, files.get(path)!);
+  }
+  return sorted;
 }

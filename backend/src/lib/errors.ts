@@ -6,8 +6,7 @@ const errorLogger = createLogger();
 export class AppError extends Error {
   readonly statusCode: number;
 
-  // biome-ignore lint/complexity/useMaxParams: extends native Error class
-  constructor(statusCode: number, message: string) {
+  constructor({ statusCode, message }: { statusCode: number; message: string }) {
     super(message);
     this.name = 'AppError';
     this.statusCode = statusCode;
@@ -16,35 +15,35 @@ export class AppError extends Error {
 
 export class BadRequestError extends AppError {
   constructor(message = 'Bad Request') {
-    super(StatusMap['Bad Request'], message);
+    super({ statusCode: StatusMap['Bad Request'], message });
     this.name = 'BadRequestError';
   }
 }
 
 export class UnauthorizedError extends AppError {
   constructor(message = 'Unauthorized') {
-    super(StatusMap.Unauthorized, message);
+    super({ statusCode: StatusMap.Unauthorized, message });
     this.name = 'UnauthorizedError';
   }
 }
 
 export class ForbiddenError extends AppError {
   constructor(message = 'Forbidden') {
-    super(StatusMap.Forbidden, message);
+    super({ statusCode: StatusMap.Forbidden, message });
     this.name = 'ForbiddenError';
   }
 }
 
 export class NotFoundError extends AppError {
   constructor(message = 'Not Found') {
-    super(StatusMap['Not Found'], message);
+    super({ statusCode: StatusMap['Not Found'], message });
     this.name = 'NotFoundError';
   }
 }
 
 export class ConflictError extends AppError {
   constructor(message = 'Conflict') {
-    super(StatusMap.Conflict, message);
+    super({ statusCode: StatusMap.Conflict, message });
     this.name = 'ConflictError';
   }
 }
