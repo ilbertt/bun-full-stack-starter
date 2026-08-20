@@ -4,14 +4,17 @@ import { sessionSecuritySchemes } from '#lib/auth/better-auth.ts';
 import { elysiaErrorHandler } from '#lib/errors.ts';
 import { requestResponsePlugin } from '#lib/request-response.ts';
 import { ApiController } from '#routes/api/controller.ts';
-import { RootController } from '#routes/controller.ts';
+import { FrontendAssetsController, FrontendFallbackController } from '#routes/controller.ts';
 
 // Pinned rather than left to the plugin's default: the frontend links to it and the dev
 // server proxies it.
 const OPENAPI_PATH = '/openapi';
 
 export function createApp() {
+  // The frontend's files go on first, ahead of every global hook — see the comment on the
+  // controller itself for why the order matters.
   return new Elysia()
+    .use(FrontendAssetsController)
     .onError(elysiaErrorHandler)
     .use(requestResponsePlugin)
     .use(
@@ -40,5 +43,5 @@ export function createApp() {
       }),
     )
     .use(ApiController)
-    .use(RootController);
+    .use(FrontendFallbackController);
 }
