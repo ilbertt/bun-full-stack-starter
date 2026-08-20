@@ -2,8 +2,10 @@ import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { SignOutButton } from '../components/auth/sign-out-button';
-import { HealthStatus } from '../components/health-status';
 import { sessionQueryOptions } from '../queries/session';
+
+// Where the backend serves the API reference, outside the router's route tree.
+const OPENAPI_PATH = '/openapi';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context }) => {
@@ -46,7 +48,10 @@ function RouteComponent() {
             Files
           </Link>
         )}
-        <HealthStatus />
+        {/* A plain anchor, not a `Link`: the docs page is rendered by the server, not the router. */}
+        <a href={OPENAPI_PATH} className="text-gray-500 text-sm hover:underline dark:text-gray-400">
+          API docs
+        </a>
         <div className="ml-auto flex items-center gap-3 text-base">
           {session ? (
             <>

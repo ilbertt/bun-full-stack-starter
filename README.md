@@ -13,6 +13,7 @@ the built frontend and the SQL migrations embedded — nothing to install on the
 | Backend   | Elysia                                                                            |
 | Frontend  | React 19, TanStack Router (file-based, code-split) + TanStack Query, Tailwind 4    |
 | API types | Eden Treaty — the client is typed from the server instance, not a schema           |
+| API docs  | `@elysiajs/openapi` — a Scalar reference at `/openapi`, generated from the routes |
 | Database  | SQLite through `Bun.SQL`, with migrations applied at startup                       |
 | Auth      | better-auth, email + password                                                     |
 | Codestyle | Biome (lint + format)                                                             |
@@ -45,6 +46,14 @@ a controller opts a route in with `.guard({ auth: true })` and gets a resolved `
 on its context, or a `401` before the handler runs. On the client, the session is loaded once in
 the root route's `beforeLoad` and put into the router context, so a protected route is a
 three-line `beforeLoad` that redirects to `/login` with a `redirect` search param.
+
+### API reference
+
+`/openapi` serves a [Scalar](https://scalar.com) reference, and `/openapi/json` the spec behind it.
+Both are generated from the same TypeBox schemas the routes already validate with, so the document
+cannot drift from the API. Protected routes carry the session cookie as their security scheme and
+the `401` they answer with, while better-auth's own routes and the frontend's files are hidden — a
+single catch-all entry and a list of hashed asset paths describe nothing worth reading.
 
 ### File storage
 

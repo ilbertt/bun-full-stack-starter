@@ -1,6 +1,7 @@
 import { type UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { filesQueryOptions } from '../../queries/files';
 import { api } from '../api';
+import { apiErrorMessage } from '../api-error';
 
 type UploadFileVariables = {
   file: File;
@@ -13,7 +14,7 @@ export function useUploadFile(): UseMutationResult<void, Error, UploadFileVariab
     mutationFn: async ({ file }: UploadFileVariables) => {
       const { error } = await api.api.files.post({ file });
       if (error) {
-        throw new Error(error.value.message ?? `Upload failed with status ${error.status}`);
+        throw new Error(apiErrorMessage(error));
       }
     },
     onSuccess: async () => {

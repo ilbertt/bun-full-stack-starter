@@ -1,7 +1,7 @@
 import { extname } from 'node:path';
 
 const BYTES_IN_A_MEGABYTE = 1_048_576;
-const MAX_UPLOAD_SIZE_MEGABYTES = 5;
+export const MAX_UPLOAD_SIZE_MEGABYTES = 5;
 const MULTIPART_OVERHEAD_MEGABYTES = 1;
 
 export const MAX_UPLOAD_SIZE = `${MAX_UPLOAD_SIZE_MEGABYTES}m` as const;

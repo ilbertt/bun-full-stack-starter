@@ -11,6 +11,9 @@ export default defineConfig({
     // present itself as the backend. Production is same-origin and needs none of this.
     proxy: {
       '/api': { target: BACKEND_ORIGIN, headers: { origin: BACKEND_ORIGIN } },
+      // The docs page and the spec it fetches are served by the backend, so the dev server
+      // has to hand both over rather than answering with the SPA.
+      '/openapi': { target: BACKEND_ORIGIN },
     },
   },
   plugins: [
