@@ -13,6 +13,11 @@ export const HealthController = new Elysia()
       return status(StatusMap.OK, result);
     },
     {
+      detail: {
+        tags: ['Health'],
+        summary: 'Check health',
+        description: 'Pings the database and reports how long the server has been up.',
+      },
       response: {
         [StatusMap.OK]: GetHealthResponseSchema,
       },

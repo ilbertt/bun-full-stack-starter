@@ -1,5 +1,7 @@
 import { Elysia, StatusMap } from 'elysia';
 import { authPlugin } from '#lib/auth/plugin.ts';
+import { ErrorResponseSchema } from '#lib/errors.ts';
+import { MAX_UPLOAD_SIZE_MEGABYTES } from '#lib/uploads.ts';
 import type { FileRecord } from '#repositories/files.repository.ts';
 import {
   FileSchema,
@@ -22,7 +24,12 @@ export const FilesController = new Elysia()
   .use(loggerPlugin('filesController'))
   .use(authPlugin)
   .use(FilesServicePlugin)
-  .guard({ auth: true })
+  .guard({
+    auth: true,
+    response: {
+      [StatusMap.Unauthorized]: ErrorResponseSchema,
+    },
+  })
   .post(
     '/files',
     async ({ body, user, filesService, logger, status }) => {
@@ -31,6 +38,14 @@ export const FilesController = new Elysia()
       return status(StatusMap.Created, toFileResponse(record));
     },
     {
+      detail: {
+        tags: ['Files'],
+        summary: 'Upload a file',
+        description: `Stores a file of up to ${MAX_UPLOAD_SIZE_MEGABYTES} MB and returns its metadata.`,
+      },
+      // The one content type this accepts, and the one the docs page then offers: without it
+      // the spec advertises JSON and urlencoded too, which the handler would reject.
+      parse: 'multipart/form-data',
       body: UploadFileBodySchema,
       response: {
         [StatusMap.Created]: FileSchema,
@@ -44,6 +59,11 @@ export const FilesController = new Elysia()
       return status(StatusMap.OK, files.map(toFileResponse));
     },
     {
+      detail: {
+        tags: ['Files'],
+        summary: 'List files',
+        description: 'Returns the metadata of every file owned by the signed-in user.',
+      },
       response: {
         [StatusMap.OK]: ListFilesResponseSchema,
       },

@@ -1,7 +1,10 @@
-import { type ErrorHandler, StatusMap } from 'elysia';
+import { type ErrorHandler, StatusMap, t } from 'elysia';
 import { createLogger } from '#lib/logger.ts';
 
 const errorLogger = createLogger();
+
+/** The body `elysiaErrorHandler` sends for every error it catches. */
+export const ErrorResponseSchema = t.Object({ error: t.String() });
 
 export class AppError extends Error {
   readonly statusCode: number;
