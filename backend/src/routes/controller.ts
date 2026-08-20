@@ -8,7 +8,8 @@ function createRootController() {
   const { assetsService } = controller.decorator;
 
   for (const [path, response] of assetsService.routes()) {
-    controller.get(path, response);
+    // Hidden from the spec: the frontend is served by this server, but it is not API surface.
+    controller.get(path, response, { detail: { hide: true } });
   }
 
   // A mount, not a `*` route: a wildcard is greedy within its own method, so a `GET *` here

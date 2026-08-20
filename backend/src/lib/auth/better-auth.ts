@@ -1,5 +1,6 @@
 import { bunSqlAdapter } from '@ilbertt/better-auth-bun-sql';
 import { betterAuth } from 'better-auth';
+import type { OpenAPIV3 } from 'openapi-types';
 import { sql } from '#db/client.ts';
 import { env } from '#lib/env.ts';
 import { RoutePrefix } from '#lib/routes/prefixes.ts';
@@ -19,3 +20,16 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   emailAndPassword: { enabled: true },
 });
+
+export const SESSION_SECURITY_SCHEME = 'betterAuthSession';
+
+export const sessionSecuritySchemes = {
+  [SESSION_SECURITY_SCHEME]: {
+    type: 'apiKey',
+    in: 'cookie',
+    // better-auth's default cookie name. The docs page sends whatever is named here, so a
+    // renamed cookie has to be renamed here too or "Authorize" silently authorizes nothing.
+    name: 'better-auth.session_token',
+    description: 'Session cookie set by signing in.',
+  },
+} satisfies Record<string, OpenAPIV3.SecuritySchemeObject>;
