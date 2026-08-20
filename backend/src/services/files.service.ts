@@ -1,5 +1,6 @@
 import { NotFoundError } from '#lib/errors.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
+import { storageExtension } from '#lib/uploads.ts';
 import type { FileRecord, FilesRepository } from '#repositories/files.repository.ts';
 import { Service } from '#services/service.ts';
 
@@ -27,7 +28,7 @@ export class FilesService extends Service {
       name: file.name,
       size: file.size,
       contentType: file.type,
-      storageKey: this.storageKeyOf({ userId, fileId: id }),
+      storageKey: this.storageKeyOf({ userId, fileId: id, fileName: file.name }),
       createdAt: new Date().toISOString(),
     };
 
@@ -76,7 +77,15 @@ export class FilesService extends Service {
     this.logger.info(`removed file ${fileId}`);
   }
 
-  private storageKeyOf({ userId, fileId }: { userId: string; fileId: string }): string {
-    return `${userId}/${fileId}`;
+  private storageKeyOf({
+    userId,
+    fileId,
+    fileName,
+  }: {
+    userId: string;
+    fileId: string;
+    fileName: string;
+  }): string {
+    return `${userId}/${fileId}${storageExtension(fileName)}`;
   }
 }
