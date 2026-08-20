@@ -29,9 +29,13 @@ const buildResult = await Bun.build({
     outfile: BACKEND_BINARY_FILE,
     // omitted entirely (not set to undefined) so Bun falls back to the host platform
     ...(BACKEND_BUILD_TARGET ? { target: BACKEND_BUILD_TARGET } : {}),
-    // @ts-expect-error: assets is still not in the types
     assets: [FRONTEND_DIST_DST, DB_MIGRATIONS_DIR],
   },
+  // Compiles the entrypoint to JSC bytecode so the binary skips parsing on every boot.
+  // Bun 1.4 lifted this to ES modules; `format` has to be spelled out because `bytecode`
+  // on its own still falls back to CommonJS, which top-level `await` cannot use.
+  bytecode: true,
+  format: 'esm',
   naming: {
     asset: '[dir]/[name].[ext]',
   },

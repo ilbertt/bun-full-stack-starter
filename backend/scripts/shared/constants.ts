@@ -26,15 +26,8 @@ export const FRONTEND_DIST_DST = join(BACKEND_DIR, PUBLIC_FRONTEND_DIR_NAME);
  * `bun-linux-x64-musl` (Alpine) or `bun-linux-x64-baseline` (CPUs without
  * AVX2). Use `host` to compile for the current machine — see `build:local`.
  *
- * Cross-compiling downloads a *released* Bun for the target platform, so while
- * we are on the 1.4.0 canary this fails off-linux: it looks for a v1.4.0 that
- * is not published yet. Until 1.4.0 ships, cross-compile from macOS by pinning
- * a released runtime:
- *
- *     BUILD_TARGET=bun-v1.3.14-linux-x64 bun run build
- *
- * CI is unaffected — it runs on linux x64, where target === host and Bun uses
- * its own executable instead of downloading one.
+ * Cross-compiling downloads a *released* Bun for the target platform, so the
+ * version in `.bun-version` has to be one npm actually serves.
  */
 export const DEFAULT_BUILD_TARGET = 'bun-linux-x64';
 

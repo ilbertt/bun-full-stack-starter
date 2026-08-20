@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import type { BunFile } from 'bun';
 
 /* Substituted at build time */
 declare const PUBLIC_FRONTEND_DIR_NAME: string;
@@ -21,12 +22,11 @@ export function getMigrations(): AssetFiles {
   return readAssets({ folderName: DB_MIGRATIONS_DIR_NAME, folder: DB_MIGRATIONS_DIR });
 }
 
-// Whether anything was embedded, rather than whether this is a compiled binary:
-// `Bun.isStandaloneExecutable` only exists on canary, and compiling for another platform
-// embeds a *released* Bun, where it reads `undefined` and every asset silently disappears.
+// Bun 1.4 ships `isStandaloneExecutable` as a released API, so where the assets live is
+// something the runtime answers rather than something to infer from a non-empty embed —
+// and reading it doesn't materialize every embedded file as a Blob just to count them.
 function readAssets({ folderName, folder }: { folderName: string; folder: string }): AssetFiles {
-  const embedded = readEmbeddedFolder(folderName);
-  return embedded.size > 0 ? embedded : readFolder(folder);
+  return Bun.isStandaloneExecutable ? readEmbeddedFolder(folderName) : readFolder(folder);
 }
 
 // `--asset <folder>` embeds a tree under its basename, which each file keeps as
@@ -35,10 +35,10 @@ function readEmbeddedFolder(folderName: string): AssetFiles {
   const prefix = `${folderName}/`;
 
   const files: AssetFiles = new Map();
-  for (const file of Bun.embeddedFiles) {
-    // @ts-expect-error: Bun types are not updated
-    const path: string = file.name;
-    if (path.startsWith(prefix)) {
+  // Declared as `Blob`, but each entry is the `BunFile` that carries the embedded path.
+  for (const file of Bun.embeddedFiles as readonly BunFile[]) {
+    const path = file.name;
+    if (path?.startsWith(prefix)) {
       files.set(path.slice(prefix.length), file);
     }
   }

@@ -50,7 +50,7 @@
     },
   },
   "overrides": {
-    "bun-types": "canary",
+    "bun-types": "^1.4.0",
   },
   "catalog": {
     "typescript": "^7.0.2",
@@ -392,7 +392,7 @@
 
     "buffer": ["buffer@5.7.1", "", { "dependencies": { "base64-js": "^1.3.1", "ieee754": "^1.1.13" } }, "sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ=="],
 
-    "bun-types": ["bun-types@1.4.0-canary.20260519T150915", "", { "dependencies": { "@types/node": "*" } }, "sha512-Wz9GvDClQ8quNXqvtm1QgDu20/Mj4x1qtJZlnczSMVPmGtdA16P06I2kxReuRafNu9UWya+mvrLVUGtz3NWNNw=="],
+    "bun-types": ["bun-types@1.4.0", "", { "dependencies": { "@types/node": "*" } }, "sha512-iIKw23BspnQQYd3prITOBxeUsxBHnwzX6YJfGMuNOZzeNcMmVqzIIVGRm1l69ogaPQmb4wB6BN8mA5bE9YuC5Q=="],
 
     "bundle-name": ["bundle-name@4.1.0", "", { "dependencies": { "run-applescript": "^7.0.0" } }, "sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q=="],
 
