@@ -5,8 +5,8 @@ import { join, resolve } from 'node:path';
 declare const PUBLIC_FRONTEND_DIR_NAME: string;
 declare const DB_MIGRATIONS_DIR_NAME: string;
 
-// Where each tree sits when running from source. A compiled binary reads the
-// files off `Bun.embeddedFiles` instead, so it never looks these up.
+// Where each tree sits when running from source. A compiled binary carries its own
+// copy and reads that instead.
 const PUBLIC_FRONTEND_DIR = resolve(process.cwd(), PUBLIC_FRONTEND_DIR_NAME);
 const DB_MIGRATIONS_DIR = resolve(import.meta.dir, '..', 'db', DB_MIGRATIONS_DIR_NAME);
 
@@ -14,24 +14,19 @@ const DB_MIGRATIONS_DIR = resolve(import.meta.dir, '..', 'db', DB_MIGRATIONS_DIR
 export type AssetFiles = Map<string, Blob>;
 
 export function getPublicAssets(): AssetFiles {
-  return isStandalone() ? getEmbeddedPublicAssets() : readFolder(PUBLIC_FRONTEND_DIR);
+  return readAssets({ folderName: PUBLIC_FRONTEND_DIR_NAME, folder: PUBLIC_FRONTEND_DIR });
 }
 
 export function getMigrations(): AssetFiles {
-  return isStandalone() ? getEmbeddedMigrations() : readFolder(DB_MIGRATIONS_DIR);
+  return readAssets({ folderName: DB_MIGRATIONS_DIR_NAME, folder: DB_MIGRATIONS_DIR });
 }
 
-export function getEmbeddedPublicAssets(): AssetFiles {
-  return readEmbeddedFolder(PUBLIC_FRONTEND_DIR_NAME);
-}
-
-export function getEmbeddedMigrations(): AssetFiles {
-  return readEmbeddedFolder(DB_MIGRATIONS_DIR_NAME);
-}
-
-function isStandalone(): boolean {
-  // @ts-expect-error: Bun types are not updated
-  return Bun.isStandaloneExecutable;
+// Whether anything was embedded, rather than whether this is a compiled binary:
+// `Bun.isStandaloneExecutable` only exists on canary, and compiling for another platform
+// embeds a *released* Bun, where it reads `undefined` and every asset silently disappears.
+function readAssets({ folderName, folder }: { folderName: string; folder: string }): AssetFiles {
+  const embedded = readEmbeddedFolder(folderName);
+  return embedded.size > 0 ? embedded : readFolder(folder);
 }
 
 // `--asset <folder>` embeds a tree under its basename, which each file keeps as
