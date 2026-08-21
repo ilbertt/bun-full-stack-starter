@@ -55,4 +55,6 @@ frontend itself.
 [backend/.env.example](./backend/.env.example).
 
 Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
-every redeploy. No Dockerfile, no YAML, nothing to install next to it.
+every redeploy. No Dockerfile, no YAML, nothing to install next to it. `BASE_URL` can stay unset
+there — nibrun injects `NIBRUN_HOSTNAME`, and the app takes `https://<that hostname>` as its
+public origin — the origin better-auth trusts and builds its URLs from.

@@ -48,7 +48,9 @@ the frontend and migrations inside it. It listens on `PORT` and expects the vari
 [backend/.env.example](./backend/.env.example).
 
 Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
-every redeploy. The [deploy-to-nibrun skill](https://github.com/ilbertt/nibrun/blob/main/skills/deploy-to-nibrun/SKILL.md)
+every redeploy. `BASE_URL` can stay unset there — nibrun injects `NIBRUN_HOSTNAME` and
+[env.ts](./backend/src/lib/env.ts) derives `https://<that hostname>` from it.
+The [deploy-to-nibrun skill](https://github.com/ilbertt/nibrun/blob/main/skills/deploy-to-nibrun/SKILL.md)
 has the commands, the guest contract and the tradeoffs:
 
 ```bash
