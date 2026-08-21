@@ -4,26 +4,7 @@ A template to build on, not a library to depend on: clone it, rename it, delete 
 need. An Elysia API and a React SPA in one Bun workspace, compiled to a single binary that
 carries the built frontend and the SQL migrations inside it.
 
-[README.md](./README.md) says what each piece does and why. This file says where things go.
-
-## Layout
-
-```
-backend/src/
-  main.ts          migrations, then the server
-  app.ts           the Elysia instance; every plugin's order is deliberate
-  types.ts         `App` — the type the frontend's client is generated from
-  routes/          one folder per URL path: controller.ts + model.ts
-  services/        business logic; plugins.ts wires the graph once
-  repositories/    SQL and object storage; nothing else touches either
-  db/migrations/   NNNN_name.sql, applied at startup
-  lib/             everything else, grouped by concern
-frontend/src/
-  routes/          file-based, code-split — routeTree.gen.ts is generated, never edited
-  components/      grouped by domain (auth/, files/)
-  queries/         `queryOptions` objects, one per resource
-  lib/hooks/       one hook per file, wrapping a query or mutation
-```
+[README.md](./README.md) says what it is and how to run it. This file says how it is built.
 
 ## Backend
 
