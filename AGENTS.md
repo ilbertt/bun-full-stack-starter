@@ -44,16 +44,12 @@ still compiles — worth it for anything touching the build, the embedded assets
 ## Deploy the app
 
 `bun run build` produces `backend/dist/app`, a single binary targeting **linux x64 (glibc)** with
-the frontend and migrations inside it. Nothing needs to be installed next to it.
+the frontend and migrations inside it. It listens on `PORT` and expects the variables in
+[backend/.env.example](./backend/.env.example).
 
-It expects `BETTER_AUTH_SECRET` in the environment, listens on `PORT` (default `3000`), and keeps
-its SQLite file and uploads under `DATA_FOLDER` (default `./data`) — so the only persistent state
-is one directory. Set `BASE_URL` to the origin it is actually served on.
-
-That shape runs anywhere a Linux binary does. On [nibrun](https://nibrun.com) the defaults line up
-without being told: the guest sets `PORT`, and `./data` resolves to the volume that survives a
-redeploy — leaving `BETTER_AUTH_SECRET` and `BASE_URL` as the only two variables to set. Install
-the skill for the commands, the guest contract, and the tradeoffs:
+Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
+every redeploy. The [deploy-to-nibrun skill](https://github.com/ilbertt/nibrun/blob/main/skills/deploy-to-nibrun/SKILL.md)
+has the commands, the guest contract and the tradeoffs:
 
 ```bash
 npx skills add ilbertt/nibrun

@@ -49,15 +49,8 @@ frontend itself.
 
 ## Deploy the app
 
-`bun run build` produces `backend/dist/app`. It expects `BETTER_AUTH_SECRET` in the environment,
-listens on `PORT` (default `3000`), and keeps its SQLite file and uploads under `DATA_FOLDER`
-(default `./data`) — so the only persistent state is one directory. Set `BASE_URL` to the origin
-it is actually served on.
+`bun run build` produces `backend/dist/app`. It listens on `PORT` and expects the variables in
+[backend/.env.example](./backend/.env.example).
 
-That runs anywhere a Linux binary does. [nibrun](https://nibrun.com) is the shortest path: drop the
-binary, get an HTTPS URL and a disk that survives a redeploy, with the defaults above already
-lining up.
-
-## License
-
-Public domain — see [LICENSE](./LICENSE).
+Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
+every redeploy. No Dockerfile, no YAML, nothing to install next to it.
