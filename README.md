@@ -1,5 +1,7 @@
 # bun-full-stack
 
+[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000)
+
 A full-stack starter that runs on Bun end to end: an Elysia API and a React SPA in one repo,
 sharing types across the wire. `bun run build` compiles it all into a **single binary** with the
 built frontend and the SQL migrations embedded — nothing to install on the target machine.
@@ -54,5 +56,3 @@ frontend itself.
 
 Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
 every redeploy. No Dockerfile, no YAML, nothing to install next to it.
-
-[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000)
