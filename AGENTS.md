@@ -43,7 +43,7 @@ bun check:all
 `bun fix:codestyle` writes what Biome can fix on its own. `bun run build` verifies the binary
 still compiles — worth it for anything touching the build, the embedded assets, or `main.ts`.
 
-## Deploying
+## Deploy the app
 
 `bun run build` produces `backend/dist/app`, a single binary targeting **linux x64 (glibc)** with
 the frontend and migrations inside it. Nothing needs to be installed next to it.

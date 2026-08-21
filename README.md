@@ -4,18 +4,14 @@ A full-stack starter that runs on Bun end to end: an Elysia API and a React SPA 
 sharing types across the wire. `bun run build` compiles it all into a **single binary** with the
 built frontend and the SQL migrations embedded — nothing to install on the target machine.
 
-**Are you an AI agent?** Head over to
-[the nibrun skill](https://github.com/ilbertt/nibrun/blob/main/skills/deploy-to-nibrun/SKILL.md) —
-it is how you get what this builds onto a server, and what to weigh before you do.
-[AGENTS.md](./AGENTS.md) is the map of the code itself.
-
-**Are you a human?** Point your agent at the skill:
-
-```bash
-npx skills add ilbertt/nibrun
-```
-
 ## Getting started
+
+### For agents
+
+Read [AGENTS.md](./AGENTS.md) — the layering, the conventions each side holds to, and what to run
+to check your work.
+
+### For humans
 
 ```bash
 bun install
@@ -50,6 +46,17 @@ frontend itself.
 - **The server serves the SPA.** Every built file is registered as its own native static route, so
   Bun answers `If-None-Match` with a `304` on its own and the hashed assets are `immutable` for a
   year. Anything that matches no file and doesn't look like an API call falls back to `index.html`.
+
+## Deploy the app
+
+`bun run build` produces `backend/dist/app`. It expects `BETTER_AUTH_SECRET` in the environment,
+listens on `PORT` (default `3000`), and keeps its SQLite file and uploads under `DATA_FOLDER`
+(default `./data`) — so the only persistent state is one directory. Set `BASE_URL` to the origin
+it is actually served on.
+
+That runs anywhere a Linux binary does. [nibrun](https://nibrun.com) is the shortest path: drop the
+binary, get an HTTPS URL and a disk that survives a redeploy, with the defaults above already
+lining up.
 
 ## License
 
