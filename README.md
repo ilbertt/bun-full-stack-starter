@@ -54,3 +54,5 @@ frontend itself.
 
 Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
 every redeploy. No Dockerfile, no YAML, nothing to install next to it.
+
+[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000)
