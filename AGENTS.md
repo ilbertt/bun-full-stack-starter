@@ -4,8 +4,6 @@ A template to build on, not a library to depend on: clone it, rename it, delete 
 need. An Elysia API and a React SPA in one Bun workspace, compiled to a single binary that
 carries the built frontend and the SQL migrations inside it.
 
-[README.md](./README.md) says what it is and how to run it. This file says how it is built.
-
 ## Backend
 
 - **Controller → service → repository, and never skip a layer.** A controller holds no logic and
