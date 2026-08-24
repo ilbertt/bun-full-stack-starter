@@ -21,11 +21,8 @@ carries the built frontend and the SQL migrations inside it.
   Elysia `.decorate` plugin. Don't construct one inside a handler.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
-- A timestamp column is `text` holding `new Date().toISOString()` — never sqlite's `datetime('now')`
-  or `date('now')`, whose output carries no zone and reads back shifted by the server's offset. The
-  row type is `string`, the response schema is `t.Date()`, and the client gets a real `Date`. Never
-  declare a date-shaped value as `t.String()`: Eden revives anything date-shaped into a `Date`
-  whatever the schema says, so the type would promise a `string` the runtime never delivers.
+- A timestamp is a `text` column holding an ISO-8601 string, `string` on the row and `t.Date()` in
+  the schema — `file.createdAt` end to end. Never `t.String()` for a date, and never `datetime('now')`.
 
 ## Frontend
 

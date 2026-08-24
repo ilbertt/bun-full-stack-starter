@@ -6,6 +6,8 @@ export const FileSchema = t.Object({
   name: t.String(),
   size: t.Number(),
   contentType: t.String(),
+  // `t.Date()` rather than the `t.String()` the column holds: Eden revives a date-shaped string
+  // into a `Date` whatever the schema says, so `t.String()` promises one the client never gets.
   createdAt: t.Date(),
 });
 
