@@ -21,6 +21,11 @@ carries the built frontend and the SQL migrations inside it.
   Elysia `.decorate` plugin. Don't construct one inside a handler.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
+- A timestamp column is `text` holding `new Date().toISOString()` — never sqlite's `datetime('now')`
+  or `date('now')`, whose output carries no zone and reads back shifted by the server's offset. The
+  row type is `string`, the response schema is `t.Date()`, and the client gets a real `Date`. Never
+  declare a date-shaped value as `t.String()`: Eden revives anything date-shaped into a `Date`
+  whatever the schema says, so the type would promise a `string` the runtime never delivers.
 
 ## Frontend
 
@@ -28,6 +33,12 @@ carries the built frontend and the SQL migrations inside it.
   that changes shape breaks the caller at compile time. There is no schema to regenerate.
 - A resource gets a `queryOptions` object in `queries/`, and hooks in `lib/hooks/` consume it.
   Components call hooks, not `api` directly.
+- A response type is derived from the client, never hand-written:
+  `NonNullable<Awaited<ReturnType<typeof api.api.files.get>>['data']>[number]`. A `types.ts`
+  mirroring the API is a second source of truth, and it drifts.
+- Eden answers `{ data, error }`, where `error` is a `{ status, value }` object rather than an
+  `Error`. Every caller throws `new Error(apiErrorMessage(error))`; a bare `throw error` hands
+  React an object where it expects a message and renders `[object Object]`.
 - Adding a route means adding a file under `routes/`; the plugin regenerates `routeTree.gen.ts`.
 
 ## Validation
@@ -35,11 +46,15 @@ carries the built frontend and the SQL migrations inside it.
 After an implementation, run:
 
 ```bash
-bun check:all
+bun fix:codestyle && bun check:all
 ```
 
-`bun fix:codestyle` writes what Biome can fix on its own. `bun run build` verifies the binary
-still compiles — worth it for anything touching the build, the embedded assets, or `main.ts`.
+`fix:codestyle` writes what Biome can fix on its own, so `check:all` is left reporting only what
+needs a decision. `bun run build` verifies the binary still compiles — worth it for anything
+touching the build, the embedded assets, or `main.ts`.
+
+None of that is verification. Types and lints pass on code whose data is the wrong shape at
+runtime, so exercise the route you changed against a running server before calling the work done.
 
 ## Deploy the app
 

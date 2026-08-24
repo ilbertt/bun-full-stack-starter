@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import { apiErrorMessage } from '../lib/api-error';
 
 export type FileSummary = NonNullable<
   Awaited<ReturnType<typeof api.api.files.get>>['data']
@@ -10,7 +11,7 @@ export const filesQueryOptions = queryOptions({
   queryFn: async () => {
     const { data, error } = await api.api.files.get();
     if (error) {
-      throw error;
+      throw new Error(apiErrorMessage(error));
     }
     return data;
   },
