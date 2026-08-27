@@ -17,7 +17,12 @@ function toServerMessage(event: UserEvent) {
     case 'file.deleted':
       return { type: event.type, fileId: event.fileId } as const;
     case 'echo':
-      return { type: event.type, text: event.text, at: event.at } as const;
+      return {
+        type: event.type,
+        text: event.text,
+        at: event.at,
+        sockets: event.sockets,
+      } as const;
   }
 }
 

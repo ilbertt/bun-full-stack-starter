@@ -10,7 +10,9 @@ const RECONNECT_DELAY_MS = 1_000;
 const RECONNECT_MAX_DELAY_MS = 30_000;
 const RECONNECT_BACKOFF = 2;
 // A window, not a history: the panel is there to show the socket working, not to keep a log.
-const MAX_LOG_ENTRIES = 6;
+// Oldest first, newest at the bottom, so a round trip reads downwards the way frames do in
+// devtools — the line you sent, then the line that came back under it.
+const MAX_LOG_ENTRIES = 8;
 
 type EventsSocket = ReturnType<typeof api.api.events.subscribe>;
 
@@ -20,26 +22,41 @@ type EventsSocket = ReturnType<typeof api.api.events.subscribe>;
  */
 export type ServerMessage = Parameters<Parameters<EventsSocket['subscribe']>[0]>[0]['data'];
 
-/** One received message, with an id of its own because messages don't carry one. */
-export type LoggedMessage = { id: number; message: ServerMessage };
+/**
+ * One frame, in whichever direction it went. Both are kept so the panel reads like the frames
+ * pane in devtools: an echo shows as the line you sent and the line that came back, which is the
+ * only way a round trip is visible at all.
+ */
+type LogEntryBody =
+  | { direction: 'sent'; text: string }
+  | { direction: 'received'; message: ServerMessage };
+
+export type LogEntry = LogEntryBody & { id: number };
 
 /**
  * The page's connection to `/api/events`: it keeps the files cache honest — what another tab, or
  * another device, uploads or deletes lands here without a refetch — and hands back the last few
- * messages plus a way to send one, which is the only part of any of this you can see working.
+ * frames plus a way to send one, which is the only part of any of this you can see working.
  */
 export function useLiveEvents(): {
   connected: boolean;
-  log: LoggedMessage[];
+  log: LogEntry[];
   send: (text: string) => void;
 } {
   const queryClient = useQueryClient();
   const [connected, setConnected] = useState(false);
-  const [log, setLog] = useState<LoggedMessage[]>([]);
+  const [log, setLog] = useState<LogEntry[]>([]);
   // The live socket, so `send` can reach the one that is currently open rather than the one that
   // existed when the component last rendered.
   const socketRef = useRef<EventsSocket | null>(null);
   const nextIdRef = useRef(0);
+
+  // Messages carry no id of their own, and two identical echoes are a legitimate thing to send.
+  const appendToLog = useCallback((entry: LogEntryBody) => {
+    nextIdRef.current += 1;
+    const id = nextIdRef.current;
+    setLog((entries) => [...entries, { ...entry, id }].slice(-MAX_LOG_ENTRIES));
+  }, []);
 
   useEffect(() => {
     let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -92,9 +109,7 @@ export function useLiveEvents(): {
             return;
         }
 
-        nextIdRef.current += 1;
-        const entry = { id: nextIdRef.current, message: data };
-        setLog((entries) => [entry, ...entries].slice(0, MAX_LOG_ENTRIES));
+        appendToLog({ direction: 'received', message: data });
       });
     };
 
@@ -113,17 +128,21 @@ export function useLiveEvents(): {
       socketRef.current?.close();
       socketRef.current = null;
     };
-  }, [queryClient]);
+  }, [queryClient, appendToLog]);
 
-  // Nothing is added to the log here: the echo comes back over the socket like any other message,
-  // which is the point — what you see arriving is what the server actually sent.
-  const send = useCallback((text: string) => {
-    if (socketRef.current?.ws.readyState !== WebSocket.OPEN) {
-      return;
-    }
-    // Typed against the route's `body`: a `type` the server doesn't serve would not compile.
-    socketRef.current.send({ type: 'echo', text });
-  }, []);
+  const send = useCallback(
+    (text: string) => {
+      if (socketRef.current?.ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      // Typed against the route's `body`: a `type` the server doesn't serve would not compile.
+      socketRef.current.send({ type: 'echo', text });
+      // Logged as sent, not as an answer: what comes back arrives over the socket like any other
+      // message, and lands in the log on its own.
+      appendToLog({ direction: 'sent', text });
+    },
+    [appendToLog],
+  );
 
   return { connected, log, send };
 }
