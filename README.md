@@ -42,9 +42,11 @@ frontend itself.
   already validate with.
 - **Live updates over a websocket.** `/api/events` is an Elysia `.ws` route behind the same `auth`
   guard as everything else. Upload or delete a file and every other tab that user has open is told
-  about it and patches its cache — no polling, no refetch. Both directions are schemas: a `t.Union`
-  the server validates every message against, and the same union narrowed by a `switch` on the
-  client, so a message that changes shape breaks the caller at compile time.
+  about it and patches its cache — no polling, no refetch. The panel on the Files page is the same
+  socket with the lid off: say something and the server says it back to every tab you have open,
+  next to the file events taking the same path. Both directions are schemas — a `t.Union` the
+  server validates every message against, and the same union narrowed by a `switch` on the client,
+  so a message that changes shape breaks the caller at compile time.
 - **SQLite through `Bun.SQL`**, with migrations applied at startup, in order, once.
 - **File storage.** Authenticated upload, list, download and delete. Metadata in SQLite, bytes
   streamed off disk by Bun with Range requests included. `Storage` is deliberately a structural

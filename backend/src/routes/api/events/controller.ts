@@ -11,9 +11,14 @@ import { EventsServicePlugin, loggerPlugin } from '#services/plugins.ts';
 const unsubscribeBySocket = new WeakMap<object, () => void>();
 
 function toServerMessage(event: UserEvent) {
-  return event.type === 'file.uploaded'
-    ? ({ type: event.type, file: toFileResponse(event.file) } as const)
-    : ({ type: event.type, fileId: event.fileId } as const);
+  switch (event.type) {
+    case 'file.uploaded':
+      return { type: event.type, file: toFileResponse(event.file) } as const;
+    case 'file.deleted':
+      return { type: event.type, fileId: event.fileId } as const;
+    case 'echo':
+      return { type: event.type, text: event.text, at: event.at } as const;
+  }
 }
 
 export const EventsController = new Elysia()
@@ -48,14 +53,26 @@ export const EventsController = new Elysia()
         }),
       );
     },
-    // Nothing but `{ type: 'ping' }` can arrive — the schema saw to that — so there is nothing
-    // to branch on. The answer proves the socket is alive end to end, both ways.
+    // `ws.body` is the parsed message, narrowed by the same union the client sends against —
+    // nothing else can reach here, so there are exactly two cases and no `default` to write.
     //
-    // Answered with `ws.send` rather than by returning it: as of Elysia 1.4.29 a returned value
-    // is checked against `response` with the test inverted, so a valid message is what gets
-    // replaced by a validation error. `ws.send` checks it the right way round.
+    // Answered with `ws.send`/`publish` rather than by returning: as of Elysia 1.4.29 a returned
+    // value is checked against `response` with the test inverted, so a valid message is what gets
+    // replaced by a validation error. Both of these check it the right way round.
     message(ws) {
-      ws.send({ type: 'pong' });
+      const { user, eventsService } = ws.data;
+
+      switch (ws.body.type) {
+        case 'ping':
+          // A keepalive nobody displays: it exists to keep an idle socket off a proxy's timeout.
+          ws.send({ type: 'pong' });
+          break;
+        case 'echo':
+          // Through the bus rather than straight back down this socket, so it reaches the user's
+          // other tabs too — the same path a file event takes.
+          eventsService.echo({ userId: user.id, text: ws.body.text });
+          break;
+      }
     },
     close(ws) {
       unsubscribeBySocket.get(ws.raw)?.();
