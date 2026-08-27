@@ -1,4 +1,5 @@
 import { NotFoundError } from '#lib/errors.ts';
+import { uuidv7 } from '#lib/id.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
 import { storageExtension } from '#lib/uploads.ts';
 import type { FileRecord, FilesRepository } from '#repositories/files.repository.ts';
@@ -26,7 +27,7 @@ export class FilesService extends Service {
   }
 
   async upload({ userId, file }: { userId: string; file: File }): Promise<FileRecord> {
-    const id = crypto.randomUUID();
+    const id = uuidv7();
     const record: FileRecord = {
       id,
       userId,
