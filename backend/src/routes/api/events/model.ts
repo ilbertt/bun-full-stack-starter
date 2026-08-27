@@ -13,7 +13,14 @@ export const ServerMessageSchema = t.Union([
   t.Object({ type: t.Literal('file.deleted'), fileId: t.String() }),
   // `t.Date()` for the same reason a row's timestamp gets one: Eden revives a date-shaped string
   // into a `Date` on the way in, over a socket exactly as over a response.
-  t.Object({ type: t.Literal('echo'), text: t.String(), at: t.Date() }),
+  t.Object({
+    type: t.Literal('echo'),
+    text: t.String(),
+    at: t.Date(),
+    // How many of this user's sockets the echo went to. Server-side knowledge, which is the
+    // point: it is the part of the reply the client could not have written itself.
+    sockets: t.Integer(),
+  }),
   t.Object({ type: t.Literal('pong') }),
 ]);
 
