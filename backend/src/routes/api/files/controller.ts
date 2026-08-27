@@ -2,23 +2,13 @@ import { Elysia, StatusMap } from 'elysia';
 import { authPlugin } from '#lib/auth/plugin.ts';
 import { ErrorResponseSchema } from '#lib/errors.ts';
 import { MAX_UPLOAD_SIZE_MEGABYTES } from '#lib/uploads.ts';
-import type { FileRecord } from '#repositories/files.repository.ts';
 import {
   FileSchema,
   ListFilesResponseSchema,
+  toFileResponse,
   UploadFileBodySchema,
 } from '#routes/api/files/model.ts';
 import { FilesServicePlugin, loggerPlugin } from '#services/plugins.ts';
-
-function toFileResponse(record: FileRecord) {
-  return {
-    id: record.id,
-    name: record.name,
-    size: record.size,
-    contentType: record.contentType,
-    createdAt: new Date(record.createdAt),
-  };
-}
 
 export const FilesController = new Elysia()
   .use(loggerPlugin('filesController'))
