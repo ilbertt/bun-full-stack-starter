@@ -4,7 +4,8 @@ import { Service } from '#services/service.ts';
 /** Something that happened to one user's data, the moment it happened. */
 export type UserEvent =
   | { type: 'file.uploaded'; file: FileRecord }
-  | { type: 'file.deleted'; fileId: string };
+  | { type: 'file.deleted'; fileId: string }
+  | { type: 'echo'; text: string; at: Date };
 
 type UserEventListener = (event: UserEvent) => void;
 
@@ -32,6 +33,15 @@ export class EventsService extends Service {
         this.listenersByUser.delete(userId);
       }
     };
+  }
+
+  /**
+   * What a client says, said back to every socket that user has open — the sender included. It
+   * earns its place in a template twice over: it is the only thing here you can see working, and
+   * it is the proof that a socket both subscribes to the fan-out and feeds it.
+   */
+  echo({ userId, text }: { userId: string; text: string }): void {
+    this.publish({ userId, event: { type: 'echo', text, at: new Date() } });
   }
 
   publish({ userId, event }: { userId: string; event: UserEvent }): void {

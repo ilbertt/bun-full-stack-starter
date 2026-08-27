@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { filesQueryOptions } from '../../queries/files';
 import { api } from '../api';
 
@@ -9,18 +9,39 @@ const PING_INTERVAL_MS = 30_000;
 const RECONNECT_DELAY_MS = 1_000;
 const RECONNECT_MAX_DELAY_MS = 30_000;
 const RECONNECT_BACKOFF = 2;
+// A window, not a history: the panel is there to show the socket working, not to keep a log.
+const MAX_LOG_ENTRIES = 6;
+
+type EventsSocket = ReturnType<typeof api.api.events.subscribe>;
 
 /**
- * Keeps the files cache honest while the page is open: what another tab — or another device —
- * uploads or deletes lands here without a refetch. The socket is the only live thing in the app,
- * so it is opened by whoever needs it and closed when they go away.
+ * Every message the route can send, derived from the client rather than written out again —
+ * the same rule a response type follows, and for the same reason.
  */
-export function useLiveEvents(): { connected: boolean } {
+export type ServerMessage = Parameters<Parameters<EventsSocket['subscribe']>[0]>[0]['data'];
+
+/** One received message, with an id of its own because messages don't carry one. */
+export type LoggedMessage = { id: number; message: ServerMessage };
+
+/**
+ * The page's connection to `/api/events`: it keeps the files cache honest — what another tab, or
+ * another device, uploads or deletes lands here without a refetch — and hands back the last few
+ * messages plus a way to send one, which is the only part of any of this you can see working.
+ */
+export function useLiveEvents(): {
+  connected: boolean;
+  log: LoggedMessage[];
+  send: (text: string) => void;
+} {
   const queryClient = useQueryClient();
   const [connected, setConnected] = useState(false);
+  const [log, setLog] = useState<LoggedMessage[]>([]);
+  // The live socket, so `send` can reach the one that is currently open rather than the one that
+  // existed when the component last rendered.
+  const socketRef = useRef<EventsSocket | null>(null);
+  const nextIdRef = useRef(0);
 
   useEffect(() => {
-    let socket: ReturnType<typeof api.api.events.subscribe> | null = null;
     let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
     let reconnectDelay = RECONNECT_DELAY_MS;
     let unmounted = false;
@@ -28,7 +49,8 @@ export function useLiveEvents(): { connected: boolean } {
     const connect = () => {
       // Same origin as every other call, so the session cookie rides along on the handshake and
       // the route's `auth: true` has a user before the upgrade is answered.
-      socket = api.api.events.subscribe();
+      const socket = api.api.events.subscribe();
+      socketRef.current = socket;
 
       socket.on('open', () => {
         reconnectDelay = RECONNECT_DELAY_MS;
@@ -62,18 +84,25 @@ export function useLiveEvents(): { connected: boolean } {
               files?.filter((file) => file.id !== data.fileId),
             );
             break;
-          case 'pong':
+          case 'echo':
             break;
+          case 'pong':
+            // The keepalive answering itself. Shown to nobody: once every thirty seconds it would
+            // be the only thing in the panel.
+            return;
         }
+
+        nextIdRef.current += 1;
+        const entry = { id: nextIdRef.current, message: data };
+        setLog((entries) => [entry, ...entries].slice(0, MAX_LOG_ENTRIES));
       });
     };
 
     connect();
 
     const pingInterval = setInterval(() => {
-      // Typed against the route's `body`: `{ type: 'pong' }` here would not compile.
-      if (socket?.ws.readyState === WebSocket.OPEN) {
-        socket.send({ type: 'ping' });
+      if (socketRef.current?.ws.readyState === WebSocket.OPEN) {
+        socketRef.current.send({ type: 'ping' });
       }
     }, PING_INTERVAL_MS);
 
@@ -81,9 +110,20 @@ export function useLiveEvents(): { connected: boolean } {
       unmounted = true;
       clearInterval(pingInterval);
       clearTimeout(reconnectTimeout);
-      socket?.close();
+      socketRef.current?.close();
+      socketRef.current = null;
     };
   }, [queryClient]);
 
-  return { connected };
+  // Nothing is added to the log here: the echo comes back over the socket like any other message,
+  // which is the point — what you see arriving is what the server actually sent.
+  const send = useCallback((text: string) => {
+    if (socketRef.current?.ws.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    // Typed against the route's `body`: a `type` the server doesn't serve would not compile.
+    socketRef.current.send({ type: 'echo', text });
+  }, []);
+
+  return { connected, log, send };
 }
