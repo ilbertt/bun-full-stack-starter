@@ -6,6 +6,7 @@ import { AssetsRepository } from '#repositories/assets.repository.ts';
 import { FilesRepository } from '#repositories/files.repository.ts';
 import { HealthRepository } from '#repositories/health.repository.ts';
 import { AssetsService } from '#services/assets.service.ts';
+import { EventsService } from '#services/events.service.ts';
 import { FilesService } from '#services/files.service.ts';
 import { HealthService } from '#services/health.service.ts';
 
@@ -14,7 +15,12 @@ const filesRepository = new FilesRepository(sql);
 const healthRepository = new HealthRepository(sql);
 
 const assetsService = new AssetsService(assetsRepository);
-const filesService = new FilesService({ filesRepo: filesRepository, storage });
+const eventsService = new EventsService();
+const filesService = new FilesService({
+  filesRepo: filesRepository,
+  storage,
+  events: eventsService,
+});
 const healthService = new HealthService(healthRepository);
 
 export function loggerPlugin(name: string) {
@@ -25,6 +31,11 @@ export function loggerPlugin(name: string) {
 export const AssetsServicePlugin = new Elysia({ name: 'service.assets' }).decorate(
   'assetsService',
   assetsService,
+);
+
+export const EventsServicePlugin = new Elysia({ name: 'service.events' }).decorate(
+  'eventsService',
+  eventsService,
 );
 
 export const FilesServicePlugin = new Elysia({ name: 'service.files' }).decorate(

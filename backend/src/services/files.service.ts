@@ -2,22 +2,27 @@ import { NotFoundError } from '#lib/errors.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
 import { storageExtension } from '#lib/uploads.ts';
 import type { FileRecord, FilesRepository } from '#repositories/files.repository.ts';
+import type { EventsService } from '#services/events.service.ts';
 import { Service } from '#services/service.ts';
 
 export class FilesService extends Service {
   private readonly filesRepo: FilesRepository;
   private readonly storage: StorageClient;
+  private readonly events: EventsService;
 
   constructor({
     filesRepo,
     storage,
+    events,
   }: {
     filesRepo: FilesRepository;
     storage: StorageClient;
+    events: EventsService;
   }) {
     super();
     this.filesRepo = filesRepo;
     this.storage = storage;
+    this.events = events;
   }
 
   async upload({ userId, file }: { userId: string; file: File }): Promise<FileRecord> {
@@ -44,6 +49,9 @@ export class FilesService extends Service {
     }
 
     this.logger.info(`stored file ${record.id} (${record.size} bytes)`);
+    // Told to every socket this user has open, this request's own tab included. Published after
+    // the row exists, so a client that reacts by reading the list cannot lose the race.
+    this.events.publish({ userId, event: { type: 'file.uploaded', file: record } });
     return record;
   }
 
@@ -75,6 +83,7 @@ export class FilesService extends Service {
 
     await this.storage.delete(storageKey);
     this.logger.info(`removed file ${fileId}`);
+    this.events.publish({ userId, event: { type: 'file.deleted', fileId } });
   }
 
   private storageKeyOf({

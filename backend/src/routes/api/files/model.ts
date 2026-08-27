@@ -1,5 +1,6 @@
 import { t } from 'elysia';
 import { MAX_UPLOAD_SIZE } from '#lib/uploads.ts';
+import type { FileRecord } from '#repositories/files.repository.ts';
 
 export const FileSchema = t.Object({
   id: t.String(),
@@ -22,3 +23,16 @@ export const FileParamsSchema = t.Object({
 });
 
 export const ListFilesResponseSchema = t.Array(FileSchema);
+
+// Next to the schema it produces, because two routes answer with a file now — the REST list and
+// the websocket's `file.uploaded` — and a stored row is not a wire shape: it carries the storage
+// key and the owner's id, neither of which any client has business seeing.
+export function toFileResponse(record: FileRecord) {
+  return {
+    id: record.id,
+    name: record.name,
+    size: record.size,
+    contentType: record.contentType,
+    createdAt: new Date(record.createdAt),
+  };
+}

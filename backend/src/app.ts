@@ -28,6 +28,15 @@ export function createApp() {
           },
           tags: [
             {
+              name: 'Events',
+              // The only place the socket is described here: a websocket is not an operation, so
+              // the route's own `detail` reaches the spec but no docs renderer draws it.
+              description:
+                'A websocket at `/api/events`, upgraded with the session cookie. It pushes ' +
+                '`file.uploaded` and `file.deleted` to every tab the signed-in user has open, ' +
+                'and answers `{ "type": "ping" }` with `{ "type": "pong" }`.',
+            },
+            {
               name: 'Files',
               description: 'Upload, list, download and delete the signed-in user’s files.',
             },

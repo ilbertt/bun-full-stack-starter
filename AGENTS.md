@@ -17,6 +17,10 @@ carries the built frontend and the SQL migrations inside it.
   what generates `/openapi`, so an undeclared response is an undocumented one.
 - A route needing a session opts in with `.guard({ auth: true })` and reads `user`/`session` off
   its context. Every query is scoped by the owner's id in the `WHERE` clause.
+- A websocket is a route like any other: `.ws()` takes the same `auth` macro — the upgrade is
+  refused with a 401 before it connects — and its `body`/`response` schemas validate what arrives
+  *and* what goes out. Answer with `ws.send`, never by returning the message: as of Elysia 1.4.29
+  a returned value has its `response` check inverted, so the valid one is what gets rejected.
 - Services are instantiated once in `services/plugins.ts` and handed to controllers through an
   Elysia `.decorate` plugin. Don't construct one inside a handler.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
@@ -33,6 +37,8 @@ carries the built frontend and the SQL migrations inside it.
 - A response type is derived from the client, never hand-written:
   `NonNullable<Awaited<ReturnType<typeof api.api.files.get>>['data']>[number]`. A `types.ts`
   mirroring the API is a second source of truth, and it drifts.
+- A socket is the same client: `api.api.events.subscribe()`, typed from the same route. The
+  message union narrows on `type`, and what you `send` is checked against the route's `body`.
 - Eden answers `{ data, error }`, where `error` is a `{ status, value }` object rather than an
   `Error`. Every caller throws `new Error(apiErrorMessage(error))`; a bare `throw error` hands
   React an object where it expects a message and renders `[object Object]`.
