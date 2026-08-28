@@ -8,7 +8,6 @@
       "backend"
     ],
     "catalog": {
-      "@better-auth/core": "^1.7.2",
       "better-auth": "^1.7.2",
       "typescript": "^7.0.2"
     }

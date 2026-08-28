@@ -14,7 +14,7 @@
     "check:types": "bun run --bun tsc -b"
   },
   "dependencies": {
-    "@better-auth/core": "catalog:",
+    "@better-auth/core": "^1.7.2",
     "@elysiajs/openapi": "^1.4.15",
     "@ilbertt/better-auth-bun-sql": "^0.3.0",
     "better-auth": "catalog:",
