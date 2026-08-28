@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
 import { NotFoundError } from '#lib/errors.ts';
 import { RoutePrefix } from '#lib/routes/prefixes.ts';
-import { AssetsServicePlugin } from '#services/plugins.ts';
+import type { AssetsServiceContract } from '#services/assets.service.ts';
 
 // Every file the frontend build produced, one route each. Mounted ahead of the global
 // lifecycle hooks on purpose: a route whose handler *is* a ready-made Response stays on
@@ -9,9 +9,12 @@ import { AssetsServicePlugin } from '#services/plugins.ts';
 // a 304 by itself. A global `derive`/`onAfterResponse` compiles the route into the dynamic
 // pipeline instead, and the free revalidation goes with it — so these are registered before
 // `requestResponsePlugin` and are the one part of the server that isn't request-logged.
-function createFrontendAssetsController() {
-  const controller = new Elysia().use(AssetsServicePlugin);
-  const { assetsService } = controller.decorator;
+export function createFrontendAssetsController({
+  assetsService,
+}: {
+  assetsService: AssetsServiceContract;
+}) {
+  const controller = new Elysia();
 
   for (const [path, response] of assetsService.routes()) {
     // Hidden from the spec: the frontend is served by this server, but it is not API surface.
@@ -25,9 +28,12 @@ function createFrontendAssetsController() {
 // swallows every GET a sibling controller binds to a wildcard of its own. A mount runs only
 // once nothing else has matched, which is what a fallback means — so unlike the assets above
 // this one has to come last.
-function createFrontendFallbackController() {
-  const controller = new Elysia().use(AssetsServicePlugin);
-  const { assetsService } = controller.decorator;
+export function createFrontendFallbackController({
+  assetsService,
+}: {
+  assetsService: AssetsServiceContract;
+}) {
+  const controller = new Elysia();
 
   controller.mount((request) => {
     const { pathname } = new URL(request.url);
@@ -45,6 +51,3 @@ function createFrontendFallbackController() {
 function isClientRoutePath(pathname: string): boolean {
   return !pathname.startsWith(RoutePrefix.Api);
 }
-
-export const FrontendAssetsController = createFrontendAssetsController();
-export const FrontendFallbackController = createFrontendFallbackController();

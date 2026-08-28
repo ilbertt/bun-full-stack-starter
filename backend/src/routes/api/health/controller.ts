@@ -1,13 +1,17 @@
 import { Elysia, StatusMap } from 'elysia';
+import { createLogger } from '#lib/logger.ts';
 import { GetHealthResponseSchema } from '#routes/api/health/model.ts';
-import { HealthServicePlugin, loggerPlugin } from '#services/plugins.ts';
+import type { HealthServiceContract } from '#services/health.service.ts';
 
-export const HealthController = new Elysia()
-  .use(loggerPlugin('healthController'))
-  .use(HealthServicePlugin)
-  .get(
+export function createHealthController({
+  healthService,
+}: {
+  healthService: HealthServiceContract;
+}) {
+  const logger = createLogger('healthController');
+  return new Elysia().get(
     '/health',
-    async ({ healthService, logger, status }) => {
+    async ({ status }) => {
       logger.info('handling health check request');
       const result = await healthService.check();
       return status(StatusMap.OK, result);
@@ -23,3 +27,4 @@ export const HealthController = new Elysia()
       },
     },
   );
+}

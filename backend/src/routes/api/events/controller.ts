@@ -1,14 +1,10 @@
 import { Elysia } from 'elysia';
-import { authPlugin } from '#lib/auth/plugin.ts';
+import type { Auth } from '#lib/auth/better-auth.ts';
+import { createAuthPlugin } from '#lib/auth/plugin.ts';
+import { createLogger } from '#lib/logger.ts';
 import { ClientMessageSchema, ServerMessageSchema } from '#routes/api/events/model.ts';
 import { toFileResponse } from '#routes/api/files/model.ts';
-import type { UserEvent } from '#services/events.service.ts';
-import { EventsServicePlugin, loggerPlugin } from '#services/plugins.ts';
-
-// `open` subscribes and `close` has to undo it, and a socket has nowhere to keep the unsubscribe
-// of its own — so it is kept here, keyed by the connection. Weak, because a connection that goes
-// away without `close` ever running takes its entry with it.
-const unsubscribeBySocket = new WeakMap<object, () => void>();
+import type { EventsServiceContract, UserEvent } from '#services/events.service.ts';
 
 function toServerMessage(event: UserEvent) {
   switch (event.type) {
@@ -26,14 +22,23 @@ function toServerMessage(event: UserEvent) {
   }
 }
 
-export const EventsController = new Elysia()
-  .use(loggerPlugin('eventsController'))
-  .use(authPlugin)
-  .use(EventsServicePlugin)
+export function createEventsController({
+  auth,
+  eventsService,
+}: {
+  auth: Auth;
+  eventsService: EventsServiceContract;
+}) {
+  // `open` subscribes and `close` has to undo it, and a socket has nowhere to keep the unsubscribe
+  // of its own — so it is kept here, keyed by the connection. Weak, because a connection that goes
+  // away without `close` ever running takes its entry with it.
+  const unsubscribeBySocket = new WeakMap<object, () => void>();
+  const logger = createLogger('eventsController');
+
   // A websocket, but a route like any other: the `auth` macro resolves the session from the
   // handshake's cookies and rejects the upgrade with a 401 before any of this runs, so `user`
   // below is as real as it is in an HTTP handler.
-  .ws('/events', {
+  return new Elysia().use(createAuthPlugin({ auth })).ws('/events', {
     auth: true,
     detail: {
       tags: ['Events'],
@@ -45,7 +50,7 @@ export const EventsController = new Elysia()
     body: ClientMessageSchema,
     response: ServerMessageSchema,
     open(ws) {
-      const { user, eventsService, logger } = ws.data;
+      const { user } = ws.data;
       logger.info(`socket ${ws.id} open for user ${user.id}`);
 
       unsubscribeBySocket.set(
@@ -65,7 +70,7 @@ export const EventsController = new Elysia()
     // value is checked against `response` with the test inverted, so a valid message is what gets
     // replaced by a validation error. Both of these check it the right way round.
     message(ws) {
-      const { user, eventsService } = ws.data;
+      const { user } = ws.data;
 
       switch (ws.body.type) {
         case 'ping':
@@ -82,6 +87,7 @@ export const EventsController = new Elysia()
     close(ws) {
       unsubscribeBySocket.get(ws.raw)?.();
       unsubscribeBySocket.delete(ws.raw);
-      ws.data.logger.info(`socket ${ws.id} closed`);
+      logger.info(`socket ${ws.id} closed`);
     },
   });
+}

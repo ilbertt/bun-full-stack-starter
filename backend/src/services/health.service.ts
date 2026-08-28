@@ -15,3 +15,5 @@ export class HealthService extends Service {
     return { status: 'ok', uptime: process.uptime() };
   }
 }
+
+export type HealthServiceContract = Pick<HealthService, 'check'>;

@@ -104,6 +104,25 @@
       }
     },
     {
+      "includes": ["backend/src/**/*.ts", "!backend/src/main.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "#db/client.ts": "Only the production composition root may select and create the database client.",
+                  "#lib/env.ts": "Only the production composition root may read production configuration.",
+                  "#lib/storage/client.ts": "Only the production composition root may select and create the storage client."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["backend/src/repositories/**/*.ts"],
       "linter": {
         "rules": {

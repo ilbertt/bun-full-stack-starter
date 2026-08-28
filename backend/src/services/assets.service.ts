@@ -54,3 +54,5 @@ export class AssetsService extends Service {
     });
   }
 }
+
+export type AssetsServiceContract = Pick<AssetsService, 'routes' | 'fallback'>;

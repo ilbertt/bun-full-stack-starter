@@ -15,28 +15,30 @@ function formatElapsed(startedAt: number | undefined): string {
   return startedAt === undefined ? '' : ` (${Math.round(performance.now() - startedAt)}ms)`;
 }
 
-export const requestResponsePlugin = new Elysia({ name: 'request-response' })
+export function createRequestResponsePlugin() {
   // Registering a route that answers with a ready-made Response runs the request
   // lifecycle against it once at startup, which isn't traffic worth logging.
-  .state('started', false)
-  .onStart(({ store }) => {
-    store.started = true;
-  })
-  .derive(() => ({ requestStartedAt: performance.now() }))
-  .onRequest(({ store }) => {
-    if (!store.started) {
-      return;
-    }
-  })
-  .onAfterResponse(({ request, set, requestStartedAt }) => {
-    const status = resolveStatus(set.status);
-    const elapsed = formatElapsed(requestStartedAt);
-    const response = `${formatRequest(request)} ${status}${elapsed}`;
+  return new Elysia({ name: 'request-response' })
+    .state('started', false)
+    .onStart(({ store }) => {
+      store.started = true;
+    })
+    .derive(() => ({ requestStartedAt: performance.now() }))
+    .onRequest(({ store }) => {
+      if (!store.started) {
+        return;
+      }
+    })
+    .onAfterResponse(({ request, set, requestStartedAt }) => {
+      const status = resolveStatus(set.status);
+      const elapsed = formatElapsed(requestStartedAt);
+      const response = `${formatRequest(request)} ${status}${elapsed}`;
 
-    let logger = httpLogger.info;
-    if (status >= StatusMap['Bad Request']) {
-      logger = httpLogger.error;
-    }
-    logger(response);
-  })
-  .as('global');
+      let logger = httpLogger.info;
+      if (status >= StatusMap['Bad Request']) {
+        logger = httpLogger.error;
+      }
+      logger(response);
+    })
+    .as('global');
+}

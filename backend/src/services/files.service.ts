@@ -4,13 +4,13 @@ import { uuidv7 } from '#lib/id.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
 import { storageExtension } from '#lib/uploads.ts';
 import type { FilesRepository } from '#repositories/files.repository.ts';
-import type { EventsService } from '#services/events.service.ts';
+import type { EventsPublisher } from '#services/events.service.ts';
 import { Service } from '#services/service.ts';
 
 export class FilesService extends Service {
   private readonly filesRepo: FilesRepository;
   private readonly storage: StorageClient;
-  private readonly events: EventsService;
+  private readonly events: EventsPublisher;
 
   constructor({
     filesRepo,
@@ -19,7 +19,7 @@ export class FilesService extends Service {
   }: {
     filesRepo: FilesRepository;
     storage: StorageClient;
-    events: EventsService;
+    events: EventsPublisher;
   }) {
     super();
     this.filesRepo = filesRepo;
@@ -100,3 +100,5 @@ export class FilesService extends Service {
     return `${userId}/${fileId}${storageExtension(fileName)}`;
   }
 }
+
+export type FilesServiceContract = Pick<FilesService, 'upload' | 'list' | 'download' | 'remove'>;

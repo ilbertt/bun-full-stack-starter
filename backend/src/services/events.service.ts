@@ -62,3 +62,6 @@ export class EventsService extends Service {
     }
   }
 }
+
+export type EventsPublisher = Pick<EventsService, 'publish'>;
+export type EventsServiceContract = Pick<EventsService, 'subscribe' | 'echo' | 'publish'>;
