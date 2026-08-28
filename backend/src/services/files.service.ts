@@ -1,8 +1,9 @@
+import type { FileRecord } from '#files/file.ts';
 import { NotFoundError } from '#lib/errors.ts';
 import { uuidv7 } from '#lib/id.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
 import { storageExtension } from '#lib/uploads.ts';
-import type { FileRecord, FilesRepository } from '#repositories/files.repository.ts';
+import type { FilesRepository } from '#repositories/files.repository.ts';
 import type { EventsService } from '#services/events.service.ts';
 import { Service } from '#services/service.ts';
 
