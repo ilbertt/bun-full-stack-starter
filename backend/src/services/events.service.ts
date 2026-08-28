@@ -1,4 +1,4 @@
-import type { FileRecord } from '#repositories/files.repository.ts';
+import type { FileRecord } from '#files/file.ts';
 import { Service } from '#services/service.ts';
 
 /** Something that happened to one user's data, the moment it happened. */

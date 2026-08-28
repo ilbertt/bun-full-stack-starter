@@ -1,14 +1,5 @@
+import type { FileRecord } from '#files/file.ts';
 import { Repository } from '#repositories/repository.ts';
-
-export interface FileRecord {
-  id: string;
-  userId: string;
-  name: string;
-  size: number;
-  contentType: string;
-  storageKey: string;
-  createdAt: string;
-}
 
 export class FilesRepository extends Repository {
   async create(file: FileRecord): Promise<void> {
