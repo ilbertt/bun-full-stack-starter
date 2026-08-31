@@ -1,7 +1,20 @@
-import type { FileRecord } from '#files/file.ts';
-import { Repository } from '#repositories/repository.ts';
+import type { SQL } from 'bun';
+import type { FileRecord } from '#domain/file.ts';
 
-export class FilesRepository extends Repository {
+export interface FilesRepositoryContract {
+  create(file: FileRecord): Promise<void>;
+  listByUser(userId: string): Promise<FileRecord[]>;
+  findForUser({ fileId, userId }: { fileId: string; userId: string }): Promise<FileRecord | null>;
+  deleteForUser({ fileId, userId }: { fileId: string; userId: string }): Promise<string | null>;
+}
+
+export class FilesRepository implements FilesRepositoryContract {
+  private readonly sql: SQL;
+
+  constructor(sql: SQL) {
+    this.sql = sql;
+  }
+
   async create(file: FileRecord): Promise<void> {
     await this.sql`
       insert into "file"

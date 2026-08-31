@@ -11,7 +11,7 @@ carries the built frontend and the SQL migrations inside it.
 - `routes/` mirrors the served path — `GET /api/health` is `routes/api/health/controller.ts`.
   The `/api` prefix is applied once in `routes/api/controller.ts`, so children write bare paths.
   Schemas live beside the controller in `model.ts`.
-- Imports use the `#*` subpath mapping (`#lib/env.ts`, `#services/plugins.ts`), with the `.ts`
+- Imports use the `#*` subpath mapping (`#lib/env.ts`, `#services/files.service.ts`), with the `.ts`
   extension. The frontend uses relative paths — it has no mapping.
 - Every route declares its `body`/`response` schemas. They are what validates the request *and*
   what generates `/openapi`, so an undeclared response is an undocumented one.
@@ -21,8 +21,18 @@ carries the built frontend and the SQL migrations inside it.
   refused with a 401 before it connects — and its `body`/`response` schemas validate what arrives
   *and* what goes out. Answer with `ws.send`, never by returning the message: as of Elysia 1.4.29
   a returned value has its `response` check inverted, so the valid one is what gets rejected.
-- Services are instantiated once in `services/plugins.ts` and handed to controllers through an
-  Elysia `.decorate` plugin. Don't construct one inside a handler.
+- `main.ts` is the composition root. It loads production configuration, opens infrastructure,
+  constructs repositories and services once, passes their narrow contracts into `createApp`, and
+  closes owned resources. Importing another module must not open a connection or select a
+  production dependency.
+- Application, controller and plugin factories receive dependencies explicitly. Services are
+  instantiated once per application and never constructed inside a handler.
+- Repository contracts live with their implementations. Services depend on those contracts, never
+  on a database client or concrete repository class. Controllers receive service contracts and do
+  not construct dependencies inside handlers.
+- Top-level directories under `backend/src` describe architectural layers, never product features.
+  Domain records and ports live in `domain/`, which must not import infrastructure or application
+  layers.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
 - A timestamp is a `text` column holding an ISO-8601 string, `string` on the row and `t.Date()` in
@@ -49,7 +59,7 @@ carries the built frontend and the SQL migrations inside it.
 After an implementation, run:
 
 ```bash
-bun fix:codestyle && bun check:all
+bun fix:codestyle && bun check:all && bun test
 ```
 
 `fix:codestyle` writes what Biome can fix on its own, so `check:all` is left reporting only what

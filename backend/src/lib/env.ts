@@ -1,5 +1,4 @@
 import { resolve } from 'node:path';
-import { ensureDir } from '#lib/filesystem.ts';
 
 interface CustomProcessEnv {
   // Entries here must match the .env file
@@ -47,16 +46,11 @@ type Env = {
   BETTER_AUTH_SECRET: string;
 };
 
-function loadEnv(): Env {
-  const dataFolder = resolve(optional({ name: 'DATA_FOLDER', defaultValue: './data' }));
-  ensureDir(dataFolder);
-
+export function loadEnv(): Env {
   return {
     PORT: Number(optional({ name: 'PORT', defaultValue: DEFAULT_PORT })),
     BASE_URL: new URL(optional({ name: 'BASE_URL', defaultValue: defaultBaseUrl() })),
-    DATA_FOLDER: dataFolder,
+    DATA_FOLDER: resolve(optional({ name: 'DATA_FOLDER', defaultValue: './data' })),
     BETTER_AUTH_SECRET: required('BETTER_AUTH_SECRET'),
   };
 }
-
-export const env = loadEnv();

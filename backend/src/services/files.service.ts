@@ -1,27 +1,27 @@
-import type { FileRecord } from '#files/file.ts';
+import type { UserEventPublisher } from '#domain/event.ts';
+import type { FileRecord } from '#domain/file.ts';
 import { NotFoundError } from '#lib/errors.ts';
 import { uuidv7 } from '#lib/id.ts';
+import { createLogger } from '#lib/logger.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
 import { storageExtension } from '#lib/uploads.ts';
-import type { FilesRepository } from '#repositories/files.repository.ts';
-import type { EventsService } from '#services/events.service.ts';
-import { Service } from '#services/service.ts';
+import type { FilesRepositoryContract } from '#repositories/files.repository.ts';
 
-export class FilesService extends Service {
-  private readonly filesRepo: FilesRepository;
+export class FilesService {
+  private readonly filesRepo: FilesRepositoryContract;
   private readonly storage: StorageClient;
-  private readonly events: EventsService;
+  private readonly events: UserEventPublisher;
+  private readonly logger = createLogger('FilesService');
 
   constructor({
     filesRepo,
     storage,
     events,
   }: {
-    filesRepo: FilesRepository;
+    filesRepo: FilesRepositoryContract;
     storage: StorageClient;
-    events: EventsService;
+    events: UserEventPublisher;
   }) {
-    super();
     this.filesRepo = filesRepo;
     this.storage = storage;
     this.events = events;
@@ -100,3 +100,5 @@ export class FilesService extends Service {
     return `${userId}/${fileId}${storageExtension(fileName)}`;
   }
 }
+
+export type FilesServiceContract = Pick<FilesService, 'upload' | 'list' | 'download' | 'remove'>;

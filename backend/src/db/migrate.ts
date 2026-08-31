@@ -1,5 +1,4 @@
 import type { SQL } from 'bun';
-import { sql } from '#db/client.ts';
 import { getMigrations } from '#lib/assets.ts';
 import { createLogger } from '#lib/logger.ts';
 
@@ -45,16 +44,16 @@ async function applyMigration({
 
 // Migrations run once at startup, on the same client the app uses: SQLite is a
 // single file, so a second connection would only add write-lock contention.
-export async function runMigrations(): Promise<void> {
-  await ensureMigrationsTable(sql);
-  const applied = await appliedMigrations(sql);
+export async function runMigrations({ db }: { db: SQL }): Promise<void> {
+  await ensureMigrationsTable(db);
+  const applied = await appliedMigrations(db);
 
   for (const [name, file] of getMigrations()) {
     if (!name.endsWith(MIGRATION_FILE_EXTENSION) || applied.has(name)) {
       continue;
     }
 
-    await applyMigration({ db: sql, name, file });
+    await applyMigration({ db, name, file });
   }
 
   logger.info('migrations applied');

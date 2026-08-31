@@ -1,7 +1,7 @@
 import { extname } from 'node:path';
+import { createLogger } from '#lib/logger.ts';
 import { RoutePrefix } from '#lib/routes/prefixes.ts';
-import type { AssetsRepository } from '#repositories/assets.repository.ts';
-import { Service } from '#services/service.ts';
+import type { AssetsRepositoryContract } from '#repositories/assets.repository.ts';
 
 const INDEX_HTML_PATH = '/index.html';
 // Vite content-hashes the filenames in this folder, so they never change.
@@ -9,11 +9,11 @@ const IMMUTABLE_PATH_PREFIX = '/assets/';
 const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 const REVALIDATE_CACHE_CONTROL = 'no-cache';
 
-export class AssetsService extends Service {
-  private readonly assetsRepo: AssetsRepository;
+export class AssetsService {
+  private readonly assetsRepo: AssetsRepositoryContract;
+  private readonly logger = createLogger('AssetsService');
 
-  constructor(assetsRepo: AssetsRepository) {
-    super();
+  constructor(assetsRepo: AssetsRepositoryContract) {
     this.assetsRepo = assetsRepo;
   }
 
@@ -54,3 +54,5 @@ export class AssetsService extends Service {
     });
   }
 }
+
+export type AssetsServiceContract = Pick<AssetsService, 'routes' | 'fallback'>;

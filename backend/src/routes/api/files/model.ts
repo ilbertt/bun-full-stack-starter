@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import type { FileRecord } from '#files/file.ts';
+import type { FileRecord } from '#domain/file.ts';
 import { MAX_UPLOAD_SIZE } from '#lib/uploads.ts';
 
 export const FileSchema = t.Object({

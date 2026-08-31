@@ -1,22 +1,41 @@
 import { openapi } from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
-import { sessionSecuritySchemes } from '#lib/auth/better-auth.ts';
+import { type Auth, sessionSecuritySchemes } from '#lib/auth/better-auth.ts';
 import { elysiaErrorHandler } from '#lib/errors.ts';
-import { requestResponsePlugin } from '#lib/request-response.ts';
-import { ApiController } from '#routes/api/controller.ts';
-import { FrontendAssetsController, FrontendFallbackController } from '#routes/controller.ts';
+import { createRequestResponsePlugin } from '#lib/request-response.ts';
+import { createApiController } from '#routes/api/controller.ts';
+import {
+  createFrontendAssetsController,
+  createFrontendFallbackController,
+} from '#routes/controller.ts';
+import type { AssetsServiceContract } from '#services/assets.service.ts';
+import type { EventsServiceContract } from '#services/events.service.ts';
+import type { FilesServiceContract } from '#services/files.service.ts';
+import type { HealthServiceContract } from '#services/health.service.ts';
 
 // Pinned rather than left to the plugin's default: the frontend links to it and the dev
 // server proxies it.
 const OPENAPI_PATH = '/openapi';
 
-export function createApp() {
+export function createApp({
+  auth,
+  assetsService,
+  eventsService,
+  filesService,
+  healthService,
+}: {
+  auth: Auth;
+  assetsService: AssetsServiceContract;
+  eventsService: EventsServiceContract;
+  filesService: FilesServiceContract;
+  healthService: HealthServiceContract;
+}) {
   // The frontend's files go on first, ahead of every global hook — see the comment on the
   // controller itself for why the order matters.
   return new Elysia()
-    .use(FrontendAssetsController)
+    .use(createFrontendAssetsController({ assetsService }))
     .onError(elysiaErrorHandler)
-    .use(requestResponsePlugin)
+    .use(createRequestResponsePlugin())
     .use(
       openapi({
         path: OPENAPI_PATH,
@@ -51,6 +70,6 @@ export function createApp() {
         },
       }),
     )
-    .use(ApiController)
-    .use(FrontendFallbackController);
+    .use(createApiController({ auth, eventsService, filesService, healthService }))
+    .use(createFrontendFallbackController({ assetsService }));
 }
