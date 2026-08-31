@@ -24,7 +24,7 @@ export const FilesFileIdController = new Elysia()
 
       // The stored type is whatever the client declared, so it is never served inline:
       // `attachment` and `nosniff` stop an uploaded `text/html` executing on this origin.
-      set.headers['content-type'] = record.contentType;
+      set.headers['content-type'] = record.content_type;
       set.headers['content-disposition'] =
         `attachment; filename*=UTF-8''${encodeURIComponent(record.name)}`;
       set.headers['x-content-type-options'] = 'nosniff';

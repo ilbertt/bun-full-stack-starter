@@ -1,9 +1,9 @@
-import type { SQL } from 'bun';
+import type { Database } from '#db/client.ts';
 
 export abstract class Repository {
-  protected readonly sql: SQL;
+  protected readonly sql: Database;
 
-  constructor(sql: SQL) {
+  constructor(sql: Database) {
     this.sql = sql;
   }
 }

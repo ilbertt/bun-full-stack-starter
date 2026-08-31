@@ -32,7 +32,7 @@ export function toFileResponse(record: FileRecord) {
     id: record.id,
     name: record.name,
     size: record.size,
-    contentType: record.contentType,
-    createdAt: new Date(record.createdAt),
+    contentType: record.content_type,
+    createdAt: new Date(record.created_at),
   };
 }

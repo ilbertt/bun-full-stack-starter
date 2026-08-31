@@ -1,9 +1,3 @@
-export interface FileRecord {
-  id: string;
-  userId: string;
-  name: string;
-  size: number;
-  contentType: string;
-  storageKey: string;
-  createdAt: string;
-}
+import type { Queries } from '#db/queries.gen.ts';
+
+export type FileRecord = Queries['ListUserFiles'];

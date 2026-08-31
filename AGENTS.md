@@ -25,8 +25,15 @@ carries the built frontend and the SQL migrations inside it.
   Elysia `.decorate` plugin. Don't construct one inside a handler.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
+- A query is tagged with a name — `` sql.ListUserFiles`...` `` — and bun-sqlgen generates its row
+  type into `db/queries.gen.ts` from the migrations. Never hand-write one. Re-run
+  `bun backend db:gen` after touching a query or a migration and commit it; `check:types` fails on
+  a stale file or a query that no longer plans.
+- Select a column under its own name: an alias loses its type, because SQLite reports no origin for
+  a renamed column. So a row carries `content_type`, and `toFileResponse` is the one place it
+  becomes `contentType`. A bare `` sql`...` `` opts out of codegen, for a result nobody reads.
 - A timestamp is a `text` column holding an ISO-8601 string, `string` on the row and `t.Date()` in
-  the schema — `file.createdAt` end to end. Never `t.String()` for a date, and never `datetime('now')`.
+  the schema. Never `t.String()` for a date, and never `datetime('now')`.
 
 ## Frontend
 
