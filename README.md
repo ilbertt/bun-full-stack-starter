@@ -1,6 +1,6 @@
 # bun-full-stack
 
-[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000)
+[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000&env=BETTER_AUTH_SECRET)
 
 A full-stack starter that runs on Bun end to end: an Elysia API and a React SPA in one repo,
 sharing types across the wire. `bun run build` compiles it all into a **single binary** with the
