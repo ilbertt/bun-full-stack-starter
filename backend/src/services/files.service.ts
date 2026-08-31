@@ -1,5 +1,5 @@
-import type { UserEventPublisher } from '#events/event.ts';
-import type { FileRecord } from '#files/file.ts';
+import type { UserEventPublisher } from '#domain/event.ts';
+import type { FileRecord } from '#domain/file.ts';
 import { NotFoundError } from '#lib/errors.ts';
 import { uuidv7 } from '#lib/id.ts';
 import { createLogger } from '#lib/logger.ts';

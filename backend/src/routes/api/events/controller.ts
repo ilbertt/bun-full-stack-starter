@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia';
-import type { UserEvent } from '#events/event.ts';
+import type { UserEvent } from '#domain/event.ts';
 import type { Auth } from '#lib/auth/better-auth.ts';
 import { createAuthPlugin } from '#lib/auth/plugin.ts';
 import { createLogger } from '#lib/logger.ts';

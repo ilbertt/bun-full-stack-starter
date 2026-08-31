@@ -30,6 +30,9 @@ carries the built frontend and the SQL migrations inside it.
 - Repository contracts live with their implementations. Services depend on those contracts, never
   on a database client or concrete repository class. Controllers receive service contracts and do
   not construct dependencies inside handlers.
+- Top-level directories under `backend/src` describe architectural layers, never product features.
+  Domain records and ports live in `domain/`, which must not import infrastructure or application
+  layers.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
 - A timestamp is a `text` column holding an ISO-8601 string, `string` on the row and `t.Date()` in

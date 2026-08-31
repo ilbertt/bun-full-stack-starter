@@ -1,5 +1,5 @@
 import type { SQL } from 'bun';
-import type { FileRecord } from '#files/file.ts';
+import type { FileRecord } from '#domain/file.ts';
 
 export interface FilesRepositoryContract {
   create(file: FileRecord): Promise<void>;

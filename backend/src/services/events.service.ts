@@ -1,4 +1,4 @@
-import type { UserEvent, UserEventListener, UserEventPublisher } from '#events/event.ts';
+import type { UserEvent, UserEventListener, UserEventPublisher } from '#domain/event.ts';
 import { createLogger } from '#lib/logger.ts';
 
 /**

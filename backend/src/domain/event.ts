@@ -1,4 +1,4 @@
-import type { FileRecord } from '#files/file.ts';
+import type { FileRecord } from '#domain/file.ts';
 
 /** Something that happened to one user's data, the moment it happened. */
 export type UserEvent =

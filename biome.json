@@ -189,7 +189,7 @@
       }
     },
     {
-      "includes": ["backend/src/events/**/*.ts", "backend/src/files/**/*.ts"],
+      "includes": ["backend/src/domain/**/*.ts"],
       "linter": {
         "rules": {
           "style": {
