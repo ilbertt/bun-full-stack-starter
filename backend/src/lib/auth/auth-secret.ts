@@ -4,10 +4,8 @@ import { join } from 'node:path';
 import { ensureDir } from '#lib/filesystem.ts';
 import { createLogger } from '#lib/logger.ts';
 
-// 32 bytes, base64-encoded: the same secret `openssl rand -base64 32` produces.
 const SECRET_BYTES = 32;
 const SECRET_FILE_NAME = '.better-auth-secret';
-// Owner read/write only. The file holds what every session cookie is signed with.
 const SECRET_FILE_MODE = 0o600;
 
 const logger = createLogger('auth-secret');
@@ -34,15 +32,9 @@ function readStoredSecret(path: string): string | undefined {
   return stored;
 }
 
-/**
- * The secret better-auth signs sessions with, resolved in order: `BETTER_AUTH_SECRET`, the secret
- * stored in the data folder, or a newly generated one written there.
- *
- * Generating it means a fresh clone — and a fresh deploy — boots without anyone setting a variable
- * first, while the secret still survives restarts, so sessions issued before one stay valid. It
- * lives in the data folder rather than the `.env` file because that is the directory a deploy
- * target persists across redeploys.
- */
+// The generated secret goes in the data folder rather than the `.env` file because that is the
+// directory a deploy target persists across redeploys, so it survives a restart and the sessions
+// signed with it stay valid.
 export function loadAuthSecret({
   dataFolder,
   environmentSecret,
