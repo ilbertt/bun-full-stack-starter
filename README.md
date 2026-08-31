@@ -1,6 +1,6 @@
 # bun-full-stack
 
-[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000&env=BETTER_AUTH_SECRET)
+[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000)
 
 A full-stack starter that runs on Bun end to end: an Elysia API and a React SPA in one repo,
 sharing types across the wire. `bun run build` compiles it all into a **single binary** with the
@@ -18,9 +18,12 @@ to check your work.
 ```bash
 bun install
 cp backend/.env.example backend/.env
-openssl rand -base64 32   # paste into BETTER_AUTH_SECRET in backend/.env
 bun run dev
 ```
+
+Nothing to fill in: the secret better-auth signs sessions with is generated into
+`backend/data/.better-auth-secret` on first start and reused from there, so set
+`BETTER_AUTH_SECRET` only when you want to pin your own.
 
 The backend comes up on `:3000` and Vite on `:5173`, proxying `/api` to it — so the browser only
 ever talks to one origin, the same arrangement as production, where the backend serves the
@@ -64,4 +67,6 @@ frontend itself.
 Run it on [nibrun](https://nibrun.com): drop the binary, get an HTTPS URL and a disk that survives
 every redeploy. No Dockerfile, no YAML, nothing to install next to it. `BASE_URL` can stay unset
 there — nibrun injects `NIBRUN_HOSTNAME`, and the app takes `https://<that hostname>` as its
-public origin — the origin better-auth trusts and builds its URLs from.
+public origin — the origin better-auth trusts and builds its URLs from. `BETTER_AUTH_SECRET` can
+stay unset too: the generated one lands on that persistent disk, so it survives redeploys and
+sessions stay valid across them.
