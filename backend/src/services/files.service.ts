@@ -1,27 +1,27 @@
+import type { UserEventPublisher } from '#events/event.ts';
 import type { FileRecord } from '#files/file.ts';
 import { NotFoundError } from '#lib/errors.ts';
 import { uuidv7 } from '#lib/id.ts';
+import { createLogger } from '#lib/logger.ts';
 import type { StorageClient } from '#lib/storage/storage.ts';
 import { storageExtension } from '#lib/uploads.ts';
-import type { FilesRepository } from '#repositories/files.repository.ts';
-import type { EventsPublisher } from '#services/events.service.ts';
-import { Service } from '#services/service.ts';
+import type { FilesRepositoryContract } from '#repositories/files.repository.ts';
 
-export class FilesService extends Service {
-  private readonly filesRepo: FilesRepository;
+export class FilesService {
+  private readonly filesRepo: FilesRepositoryContract;
   private readonly storage: StorageClient;
-  private readonly events: EventsPublisher;
+  private readonly events: UserEventPublisher;
+  private readonly logger = createLogger('FilesService');
 
   constructor({
     filesRepo,
     storage,
     events,
   }: {
-    filesRepo: FilesRepository;
+    filesRepo: FilesRepositoryContract;
     storage: StorageClient;
-    events: EventsPublisher;
+    events: UserEventPublisher;
   }) {
-    super();
     this.filesRepo = filesRepo;
     this.storage = storage;
     this.events = events;

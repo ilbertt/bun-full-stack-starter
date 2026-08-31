@@ -1,10 +1,11 @@
 import { Elysia } from 'elysia';
+import type { UserEvent } from '#events/event.ts';
 import type { Auth } from '#lib/auth/better-auth.ts';
 import { createAuthPlugin } from '#lib/auth/plugin.ts';
 import { createLogger } from '#lib/logger.ts';
 import { ClientMessageSchema, ServerMessageSchema } from '#routes/api/events/model.ts';
 import { toFileResponse } from '#routes/api/files/model.ts';
-import type { EventsServiceContract, UserEvent } from '#services/events.service.ts';
+import type { EventsServiceContract } from '#services/events.service.ts';
 
 function toServerMessage(event: UserEvent) {
   switch (event.type) {

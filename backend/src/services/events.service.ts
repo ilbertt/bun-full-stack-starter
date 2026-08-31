@@ -1,13 +1,5 @@
-import type { FileRecord } from '#files/file.ts';
-import { Service } from '#services/service.ts';
-
-/** Something that happened to one user's data, the moment it happened. */
-export type UserEvent =
-  | { type: 'file.uploaded'; file: FileRecord }
-  | { type: 'file.deleted'; fileId: string }
-  | { type: 'echo'; text: string; at: Date; sockets: number };
-
-type UserEventListener = (event: UserEvent) => void;
+import type { UserEvent, UserEventListener, UserEventPublisher } from '#events/event.ts';
+import { createLogger } from '#lib/logger.ts';
 
 /**
  * The fan-out behind the `/api/events` socket: a service publishes, and every socket that user
@@ -17,8 +9,9 @@ type UserEventListener = (event: UserEvent) => void;
  * state from the REST route the next time it asks. Two instances behind a load balancer would
  * need a real broker in here, and that is the one line that changes.
  */
-export class EventsService extends Service {
+export class EventsService implements UserEventPublisher {
   private readonly listenersByUser = new Map<string, Set<UserEventListener>>();
+  private readonly logger = createLogger('EventsService');
 
   /** Answers with the unsubscribe: whoever subscribes owns tearing it down. */
   subscribe({ userId, listener }: { userId: string; listener: UserEventListener }): () => void {
@@ -63,5 +56,4 @@ export class EventsService extends Service {
   }
 }
 
-export type EventsPublisher = Pick<EventsService, 'publish'>;
 export type EventsServiceContract = Pick<EventsService, 'subscribe' | 'echo' | 'publish'>;

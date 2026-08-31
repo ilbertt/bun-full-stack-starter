@@ -2,7 +2,11 @@ import { getPublicAssets } from '#lib/assets.ts';
 
 type StaticAssetsMap = Map<string, Blob>;
 
-export class AssetsRepository {
+export interface AssetsRepositoryContract {
+  list(): StaticAssetsMap;
+}
+
+export class AssetsRepository implements AssetsRepositoryContract {
   private assets: StaticAssetsMap | null = null;
 
   list(): StaticAssetsMap {

@@ -21,12 +21,15 @@ carries the built frontend and the SQL migrations inside it.
   refused with a 401 before it connects — and its `body`/`response` schemas validate what arrives
   *and* what goes out. Answer with `ws.send`, never by returning the message: as of Elysia 1.4.29
   a returned value has its `response` check inverted, so the valid one is what gets rejected.
-- `main.ts` is the production composition root. It loads configuration, creates resources,
-  repositories, services, auth and the application, and owns their lifetimes.
-- Application, controller and plugin factories receive dependencies explicitly. Importing a module
-  must not read production configuration, open resources or construct the production graph.
-- Services are instantiated once per application and passed to its factories. Don't construct one
-  inside a handler.
+- `main.ts` is the composition root. It loads production configuration, opens infrastructure,
+  constructs repositories and services once, passes their narrow contracts into `createApp`, and
+  closes owned resources. Importing another module must not open a connection or select a
+  production dependency.
+- Application, controller and plugin factories receive dependencies explicitly. Services are
+  instantiated once per application and never constructed inside a handler.
+- Repository contracts live with their implementations. Services depend on those contracts, never
+  on a database client or concrete repository class. Controllers receive service contracts and do
+  not construct dependencies inside handlers.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
 - A timestamp is a `text` column holding an ISO-8601 string, `string` on the row and `t.Date()` in
