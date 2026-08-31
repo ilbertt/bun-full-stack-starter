@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { loadAuthSecret } from '#lib/auth/auth-secret.ts';
 import { ensureDir } from '#lib/filesystem.ts';
 
 interface CustomProcessEnv {
@@ -6,7 +7,8 @@ interface CustomProcessEnv {
   readonly PORT?: string;
   readonly BASE_URL?: string;
   readonly DATA_FOLDER?: string;
-  readonly BETTER_AUTH_SECRET: string;
+  // Optional: generated into the data folder on first start when it isn't set
+  readonly BETTER_AUTH_SECRET?: string;
   // Injected by the host, never written to the .env file
   readonly NIBRUN_HOSTNAME?: string;
 }
@@ -20,14 +22,6 @@ const LOCAL_BASE_URL = `http://localhost:${DEFAULT_PORT}`;
 function defaultBaseUrl(): string {
   const nibrunHostname = process.env.NIBRUN_HOSTNAME;
   return nibrunHostname ? `https://${nibrunHostname}` : LOCAL_BASE_URL;
-}
-
-function required(name: keyof CustomProcessEnv): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
 }
 
 function optional({
@@ -55,7 +49,10 @@ function loadEnv(): Env {
     PORT: Number(optional({ name: 'PORT', defaultValue: DEFAULT_PORT })),
     BASE_URL: new URL(optional({ name: 'BASE_URL', defaultValue: defaultBaseUrl() })),
     DATA_FOLDER: dataFolder,
-    BETTER_AUTH_SECRET: required('BETTER_AUTH_SECRET'),
+    BETTER_AUTH_SECRET: loadAuthSecret({
+      dataFolder,
+      environmentSecret: process.env.BETTER_AUTH_SECRET,
+    }),
   };
 }
 
