@@ -14,7 +14,8 @@
       "!**/bun.lock",
       "!**/*.lock",
       "!**/*.svg",
-      "!frontend/src/routeTree.gen.ts"
+      "!frontend/src/routeTree.gen.ts",
+      "!backend/src/db/queries.gen.ts"
     ]
   },
   "formatter": {

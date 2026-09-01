@@ -11,12 +11,15 @@
   "scripts": {
     "dev": "bun run scripts/dev.ts",
     "build": "bun run scripts/build.ts",
-    "check:types": "bun run --bun tsc -b"
+    "check:types": "bun run check:queries && bun run --bun tsc -b",
+    "check:queries": "bun run db:gen --check",
+    "db:gen": "bun run --bun bun-sqlgen generate 'src/**/*.ts' --migrations src/db/migrations --out src/db/queries.gen.ts --dialect sqlite"
   },
   "dependencies": {
     "@better-auth/core": "^1.7.2",
     "@elysiajs/openapi": "^1.4.15",
     "@ilbertt/better-auth-bun-sql": "^0.3.0",
+    "@ilbertt/bun-sqlgen": "^0.5.1",
     "better-auth": "catalog:",
     "elysia": "^1.4.30"
   },

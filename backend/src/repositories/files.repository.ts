@@ -3,19 +3,18 @@ import { Repository } from '#repositories/repository.ts';
 
 export class FilesRepository extends Repository {
   async create(file: FileRecord): Promise<void> {
-    await this.sql`
+    await this.sql.CreateFile`
       insert into "file"
         ("id", "user_id", "name", "size", "content_type", "storage_key", "created_at")
       values
-        (${file.id}, ${file.userId}, ${file.name}, ${file.size}, ${file.contentType},
-         ${file.storageKey}, ${file.createdAt})
+        (${file.id}, ${file.user_id}, ${file.name}, ${file.size}, ${file.content_type},
+         ${file.storage_key}, ${file.created_at})
     `;
   }
 
   async listByUser(userId: string): Promise<FileRecord[]> {
-    return await this.sql<FileRecord[]>`
-      select "id", "user_id" as "userId", "name", "size", "content_type" as "contentType",
-             "storage_key" as "storageKey", "created_at" as "createdAt"
+    return await this.sql.ListUserFiles`
+      select "id", "user_id", "name", "size", "content_type", "storage_key", "created_at"
       from "file"
       where "user_id" = ${userId}
       order by "created_at" desc
@@ -29,9 +28,8 @@ export class FilesRepository extends Repository {
     fileId: string;
     userId: string;
   }): Promise<FileRecord | null> {
-    const rows = await this.sql<FileRecord[]>`
-      select "id", "user_id" as "userId", "name", "size", "content_type" as "contentType",
-             "storage_key" as "storageKey", "created_at" as "createdAt"
+    const rows = await this.sql.FindUserFile`
+      select "id", "user_id", "name", "size", "content_type", "storage_key", "created_at"
       from "file"
       where "id" = ${fileId} and "user_id" = ${userId}
     `;
@@ -46,11 +44,11 @@ export class FilesRepository extends Repository {
     fileId: string;
     userId: string;
   }): Promise<string | null> {
-    const rows = await this.sql<Array<{ storageKey: string }>>`
+    const rows = await this.sql.DeleteUserFile`
       delete from "file"
       where "id" = ${fileId} and "user_id" = ${userId}
-      returning "storage_key" as "storageKey"
+      returning "storage_key"
     `;
-    return rows[0]?.storageKey ?? null;
+    return rows[0]?.storage_key ?? null;
   }
 }

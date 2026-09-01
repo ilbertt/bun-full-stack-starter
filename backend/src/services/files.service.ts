@@ -31,22 +31,22 @@ export class FilesService extends Service {
     const id = uuidv7();
     const record: FileRecord = {
       id,
-      userId,
+      user_id: userId,
       name: file.name,
       size: file.size,
-      contentType: file.type,
-      storageKey: this.storageKeyOf({ userId, fileId: id, fileName: file.name }),
-      createdAt: new Date().toISOString(),
+      content_type: file.type,
+      storage_key: this.storageKeyOf({ userId, fileId: id, fileName: file.name }),
+      created_at: new Date().toISOString(),
     };
 
-    await this.storage.write(record.storageKey, file);
+    await this.storage.write(record.storage_key, file);
 
     try {
       await this.filesRepo.create(record);
     } catch (error) {
       // No transaction spans the store and the database. Of the two possible orphans only this
       // one is recoverable: a row without an object 404s forever, an object alone wastes space.
-      await this.storage.delete(record.storageKey);
+      await this.storage.delete(record.storage_key);
       throw error;
     }
 
@@ -70,11 +70,11 @@ export class FilesService extends Service {
       throw new NotFoundError('File not found');
     }
 
-    if (!(await this.storage.exists(record.storageKey))) {
+    if (!(await this.storage.exists(record.storage_key))) {
       throw new NotFoundError('File not found');
     }
 
-    return { record, body: this.storage.file(record.storageKey) };
+    return { record, body: this.storage.file(record.storage_key) };
   }
 
   async remove({ fileId, userId }: { fileId: string; userId: string }): Promise<void> {

@@ -51,6 +51,9 @@ frontend itself.
   server validates every message against, and the same union narrowed by a `switch` on the client,
   so a message that changes shape breaks the caller at compile time.
 - **SQLite through `Bun.SQL`**, with migrations applied at startup, in order, once.
+- **Typed SQL without an ORM.** Queries stay raw SQL, tagged with a name, and
+  [bun-sqlgen](https://github.com/ilbertt/bun-sqlgen) generates each one's row type from the
+  migrations — so a renamed column is a compile error rather than a runtime `undefined`.
 - **File storage.** Authenticated upload, list, download and delete. Metadata in SQLite, bytes
   streamed off disk by Bun with Range requests included. `Storage` is deliberately a structural
   subset of `Bun.S3Client` — and a compile-time assertion keeps it that way — so moving to real
