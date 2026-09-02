@@ -1,7 +1,7 @@
 import { type UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
-import { sessionQueryOptions } from '../../queries/session';
 import { authClient } from '../auth';
+import { completeAuthenticationTransition } from '../auth-transition';
 
 type SignUpVariables = {
   name: string;
@@ -21,8 +21,7 @@ export function useSignUp(): UseMutationResult<void, Error, SignUpVariables> {
       }
     },
     onSuccess: async () => {
-      queryClient.removeQueries({ queryKey: sessionQueryOptions.queryKey });
-      await router.invalidate();
+      await completeAuthenticationTransition({ queryClient, router });
     },
   });
 }
