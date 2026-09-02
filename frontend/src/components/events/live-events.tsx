@@ -1,15 +1,12 @@
 import { useState } from 'react';
+import { cn } from '../../lib/class-names';
 import { type LogEntry, useLiveEvents } from '../../lib/hooks/use-live-events';
+import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
+import { Input } from '../ui/input';
 
 // The server has the real limit; this only stops the input offering to break it.
 const MAX_MESSAGE_LENGTH = 200;
-const INPUT_CLASS_NAME =
-  'min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:focus:border-gray-500';
-const BUTTON_CLASS_NAME =
-  'rounded-md bg-gray-900 px-3 py-2 font-medium text-sm text-white hover:bg-gray-800 disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200';
-const META_CLASS_NAME = 'text-gray-500 text-xs dark:text-gray-400';
-const SENT_CLASS_NAME = 'text-blue-600 dark:text-blue-400';
-const RECEIVED_CLASS_NAME = 'text-green-600 dark:text-green-400';
 
 function describe(entry: LogEntry): string {
   if (entry.direction === 'sent') {
@@ -44,70 +41,68 @@ export function LiveEvents() {
   const [text, setText] = useState('');
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-800">
-      <div className="flex items-center gap-2">
-        <h4 className="font-medium text-sm">Socket</h4>
-        <span
-          className={META_CLASS_NAME}
-          title={connected ? 'Subscribed to /api/events' : 'Reconnecting…'}
-        >
+    <Card>
+      <CardContent className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <h4 className="font-medium text-sm">Socket</h4>
           <span
-            className={`mr-1.5 inline-block size-2 rounded-full align-middle ${
-              connected ? 'bg-green-500' : 'bg-gray-400'
-            }`}
-            aria-hidden
-          />
-          {connected ? 'Live' : 'Offline'}
-        </span>
-      </div>
+            className="text-muted-foreground text-xs"
+            title={connected ? 'Subscribed to /api/events' : 'Reconnecting…'}
+          >
+            <span
+              className={cn(
+                'mr-1.5 inline-block size-2 rounded-full align-middle',
+                connected ? 'bg-green-500' : 'bg-muted-foreground',
+              )}
+              aria-hidden
+            />
+            {connected ? 'Live' : 'Offline'}
+          </span>
+        </div>
 
-      <form
-        className="flex items-center gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          send(text);
-          setText('');
-        }}
-      >
-        <input
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          maxLength={MAX_MESSAGE_LENGTH}
-          placeholder="Say something to the server"
-          aria-label="Message the server"
-          className={INPUT_CLASS_NAME}
-        />
-        <button
-          type="submit"
-          disabled={!connected || text.trim().length === 0}
-          className={BUTTON_CLASS_NAME}
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            send(text);
+            setText('');
+          }}
         >
-          Send
-        </button>
-      </form>
+          <Input
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            maxLength={MAX_MESSAGE_LENGTH}
+            placeholder="Say something to the server"
+            aria-label="Message the server"
+          />
+          <Button type="submit" disabled={!connected || text.trim().length === 0}>
+            Send
+          </Button>
+        </form>
 
-      {log.length === 0 ? (
-        <p className={META_CLASS_NAME}>
-          Nothing yet. Send a message, or upload a file — both cross this socket.
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-1">
-          {log.map((entry) => (
-            <li key={entry.id} className={`flex gap-2 font-mono ${META_CLASS_NAME}`}>
-              <span
-                aria-hidden
-                className={entry.direction === 'sent' ? SENT_CLASS_NAME : RECEIVED_CLASS_NAME}
-              >
-                {entry.direction === 'sent' ? '↑' : '↓'}
-              </span>
-              <span className="sr-only">
-                {entry.direction === 'sent' ? 'sent to server' : 'received from server'}
-              </span>
-              <span className="truncate">{describe(entry)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+        {log.length === 0 ? (
+          <p className="text-muted-foreground text-xs">
+            Nothing yet. Send a message, or upload a file — both cross this socket.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {log.map((entry) => (
+              <li key={entry.id} className="flex gap-2 font-mono text-muted-foreground text-xs">
+                <span
+                  aria-hidden
+                  className={entry.direction === 'sent' ? 'text-blue-600' : 'text-green-600'}
+                >
+                  {entry.direction === 'sent' ? '↑' : '↓'}
+                </span>
+                <span className="sr-only">
+                  {entry.direction === 'sent' ? 'sent to server' : 'received from server'}
+                </span>
+                <span className="truncate">{describe(entry)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }
