@@ -33,8 +33,8 @@
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": "1.4.1",
+    "bun": "1.4.2",
     "node": "please use bun"
   },
-  "packageManager": "bun@1.4.1"
+  "packageManager": "bun@1.4.2"
 }
