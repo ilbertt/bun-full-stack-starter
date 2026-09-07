@@ -14,8 +14,13 @@ export const Route = createFileRoute('/files')({
 
 function RouteComponent() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
-      <h3 className="font-semibold text-lg">Files</h3>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
+      <div>
+        <h1 className="font-semibold text-2xl tracking-tight">Files</h1>
+        <p className="mt-1 text-muted-foreground text-sm">
+          Uploads are private to the signed-in account.
+        </p>
+      </div>
       <FileUploadForm />
       <FilesList />
       {/* Holds the socket open for as long as this page is: the list above updates from it, and

@@ -6,8 +6,9 @@ export const Route = createFileRoute('/')({
 
 function HomeComponent() {
   return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
+    <div className="mx-auto w-full max-w-2xl p-6">
+      <h1 className="font-semibold text-2xl tracking-tight">Welcome home</h1>
+      <p className="mt-2 text-muted-foreground">A Bun application, ready to build on.</p>
     </div>
   );
 }

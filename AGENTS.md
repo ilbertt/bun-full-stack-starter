@@ -50,6 +50,12 @@ carries the built frontend and the SQL migrations inside it.
   `Error`. Every caller throws `new Error(apiErrorMessage(error))`; a bare `throw error` hands
   React an object where it expects a message and renders `[object Object]`.
 - Adding a route means adding a file under `routes/`; the plugin regenerates `routeTree.gen.ts`.
+- Reusable interactive primitives are reviewed shadcn source in `components/ui`, built on Base UI.
+  They contain no application or domain behavior, and application components reuse them instead of
+  hand-styling native equivalents.
+- Application styling uses Tailwind utilities and `cva` variants. `styles.css` only imports
+  Tailwind and the canonical shadcn token theme; do not add feature stylesheets, CSS modules, or
+  page-specific global selectors.
 
 ## Validation
 

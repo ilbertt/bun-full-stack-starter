@@ -4,6 +4,11 @@ import ReactDOM from 'react-dom/client';
 import { routeTree } from './routeTree.gen';
 import './styles.css';
 
+document.documentElement.classList.toggle(
+  'dark',
+  window.matchMedia('(prefers-color-scheme: dark)').matches,
+);
+
 const queryClient = new QueryClient();
 
 const router = createRouter({
