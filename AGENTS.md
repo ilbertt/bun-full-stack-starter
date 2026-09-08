@@ -25,6 +25,8 @@ carries the built frontend and the SQL migrations inside it.
   Elysia `.decorate` plugin. Don't construct one inside a handler.
 - A migration is the next-numbered file in `db/migrations/`. They run at startup, in order, once.
   Never edit one that has shipped.
+- `better-auth` is pinned to an exact version because bumping it can change its schema: re-run the
+  command at the top of `0000_better_auth_schema.sql` and ship the diff as a new migration.
 - A query is tagged with a name — `` sql.ListUserFiles`...` `` — and bun-sqlgen generates its row
   type into `db/queries.gen.ts` from the migrations. Never hand-write one. Re-run
   `bun backend db:gen` after touching a query or a migration and commit it; `check:types` fails on
