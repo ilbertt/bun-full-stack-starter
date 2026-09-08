@@ -42,7 +42,6 @@ export interface Queries {
 /** Columns of `auth_account`. */
 export interface IAuthAccountColumns {
     id: string;
-    issuer: string;
     accountId: string;
     providerId: string;
     userId: string;
@@ -147,7 +146,6 @@ export const schema = {
         _relationType: "table",
         _columns: {
             id: { _columnName: "id", _foreignKeys: {} },
-            issuer: { _columnName: "issuer", _foreignKeys: {} },
             accountId: { _columnName: "accountId", _foreignKeys: {} },
             providerId: { _columnName: "providerId", _foreignKeys: {} },
             userId: { _columnName: "userId", _foreignKeys: {} },
@@ -162,7 +160,6 @@ export const schema = {
             updatedAt: { _columnName: "updatedAt", _foreignKeys: {} }
         },
         _indexes: {
-            auth_account_issuer_accountId_uidx: { _indexName: "auth_account_issuer_accountId_uidx" },
             auth_account_userId_idx: { _indexName: "auth_account_userId_idx" },
             sqlite_autoindex_auth_account_1: { _indexName: "sqlite_autoindex_auth_account_1" }
         },
