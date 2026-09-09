@@ -73,3 +73,7 @@ there — nibrun injects `NIBRUN_HOSTNAME`, and the app takes `https://<that hos
 public origin — the origin better-auth trusts and builds its URLs from. `BETTER_AUTH_SECRET` can
 stay unset too: the generated one lands on that persistent disk, so it survives redeploys and
 sessions stay valid across them.
+
+For a versioned binary, run the **release** workflow from the Actions tab. It builds the linux x64
+binary, tags the commit it ran on with the date — `v2026.9.9-1`, and a second cut that day is `-2`
+— and attaches the binary to a GitHub Release. Manual dispatch only: nothing releases on a push.
