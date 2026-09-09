@@ -1,0 +1,44 @@
+name: release
+
+on: workflow_dispatch
+
+permissions:
+  contents: write # create the tag and the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          # The version counts the day's existing tags, which a shallow clone has none of.
+          fetch-depth: 0
+
+      - uses: ./.github/actions/prepare
+
+      # CalVer `YYYY.M.D-N` with no leading zeros — `v2026.9.9-1`. Dates rather than semver
+      # because a template's releases are cuts of whatever has landed, not features and fixes.
+      # The `-N` is a same-day counter and is on every tag, the day's first included, so a re-cut
+      # never collides with the release before it.
+      - name: Compute the version
+        id: version
+        run: |
+          today="$(date -u +%Y.%-m.%-d)"
+          cut_today="$(git tag --list "v${today}-*" | wc -l)"
+          echo "tag=v${today}-$((cut_today + 1))" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: bun run build
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          mv backend/dist/app backend/dist/app-linux-x64
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --target "$GITHUB_SHA" \
+            --generate-notes \
+            backend/dist/app-linux-x64
