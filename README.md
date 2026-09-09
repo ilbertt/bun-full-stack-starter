@@ -1,6 +1,6 @@
 # bun-full-stack
 
-[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&port=3000)
+[![Deploy on nibrun](https://nibrun.com/button.svg)](https://app.nibrun.com/deploy?name=bun-full-stack&binary=https%3A%2F%2Fgithub.com%2Filbertt%2Fbun-full-stack-starter%2Freleases%2Flatest%2Fdownload%2Fapp-linux-x64&port=3000&minimal)
 
 A full-stack starter that runs on Bun end to end: an Elysia API and a React SPA in one repo,
 sharing types across the wire. `bun run build` compiles it all into a **single binary** with the
@@ -73,3 +73,8 @@ there — nibrun injects `NIBRUN_HOSTNAME`, and the app takes `https://<that hos
 public origin — the origin better-auth trusts and builds its URLs from. `BETTER_AUTH_SECRET` can
 stay unset too: the generated one lands on that persistent disk, so it survives redeploys and
 sessions stay valid across them.
+
+For a versioned binary, run the **release** workflow from the Actions tab. It builds the linux x64
+binary, tags the commit it ran on with the date — `v2026.9.9-1`, and a second cut that day is `-2`
+— and attaches the binary to a GitHub Release. Manual dispatch only: nothing releases on a push,
+and the button at the top of this file deploys whatever the newest release holds.

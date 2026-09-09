@@ -1,0 +1,37 @@
+name: release
+
+on: workflow_dispatch
+
+permissions:
+  contents: write # create the tag and the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          # The version counts the day's existing tags, which a shallow clone has none of.
+          fetch-depth: 0
+
+      - uses: ./.github/actions/prepare
+
+      - name: Build
+        run: bun run build
+
+      - name: Prepare the release
+        id: release
+        run: bun backend release:prepare
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          ASSET: ${{ steps.release.outputs.asset }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --target "$GITHUB_SHA" \
+            --generate-notes \
+            "$ASSET"
