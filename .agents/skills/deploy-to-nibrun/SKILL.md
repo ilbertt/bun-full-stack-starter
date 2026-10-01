@@ -102,12 +102,44 @@ the folder rather than its contents puts every file one directory deeper than th
 files are the whole of how anything gets onto the volume. A zip made anywhere but unix carries no
 permissions, so an executable bit does not survive one.
 
+### Try seeding first-run setup before going public
+
+Some apps let the first visitor claim the admin account. Their public URL is reachable as soon
+as they boot, so check whether that setup can be seeded before deploying. This depends on what
+the app supports and what can run on the local machine:
+
+1. Look for a build for the local OS and architecture, or a supported way to run the app from
+   source. **The Linux binary uploaded to nibrun cannot run directly on macOS.** Use the same app
+   version and check that its data can move between the local and Linux builds.
+2. If supported, seed a dedicated data folder using the app's documented initialization command,
+   or run the local build bound to `127.0.0.1`, complete admin setup, and stop it cleanly.
+3. Deploy the seeded folder with `--data-folder`, using the Linux x86_64 binary. Supply any
+   encryption keys or other environment values the saved data needs on this first deploy.
+4. Check the public app requires the configured login and no longer offers an initial admin claim.
+
+```sh
+nib run ./my-server-linux-x64 --name my-app --data-folder ./configured-data
+```
+
+If seeding succeeds, the app starts with its admin account already claimed. Keep the configured
+data folder private: it contains the app's account state.
+
+If a compatible local build or initialization method is unavailable, check whether the app can
+set initial admin credentials through configuration on its first boot. If neither approach is
+supported, explain that seeding could not be done and that first-visitor setup will be reachable
+when the public URL goes live.
+
+### Redeploying
+
 **Every deploy after that must name the app**, or a non-interactive shell creates a second one.
 `nib apps list` finds the name again when a later session has to redeploy:
 
 ```sh
 nib run ./my-server --app my-app
 ```
+
+For a local binary, the CLI skips uploading when that app already has an artifact with the same
+bytes and filename. It still creates a new deployment with the configuration you supplied.
 
 Environment variables are an **edit**, not a replacement — anything a deploy does not name is left
 alone, so secrets are set once:
@@ -153,7 +185,8 @@ ask the URL for something:
 curl -fsS https://my-app.nibrun.app/
 ```
 
-`nib apps logs --app my-app` says why one that was created never came up, and what one that did is
+`nib apps logs --app my-app` prints recent output and exits. Add `--follow` for live output, or
+`--timerange 2h` to read further back. It says why an app never came up, and what one that did is
 complaining about. `nib --help` lists the rest — status, domains, filesystem, export, delete.
 
 ## Copying an app
@@ -174,6 +207,10 @@ and the `.env` unpacked beside it were never on it. Nothing outside the volume c
 exported `.env` as the record of what the original had.
 
 ## The guest contract
+
+Apps and persistent storage are hosted in Frankfurt, Germany (AWS `eu-central-1`). Uploaded
+binaries, data imports, exports and platform database backups are stored in the same region.
+HTTPS requests pass through Cloudflare's global network.
 
 Everything the binary can count on, and nothing else:
 
@@ -210,9 +247,10 @@ it uses when it is not on nibrun.
 
 A binary that insists on a variable name of its own reaches the same values through it —
 `APP_BASE_URL=https://${NIBRUN_HOSTNAME}`, `DATABASE_URL=file:${NIBRUN_DATA_DIR}/app.db` — and the
-guest expands it before exec. Only the `NIBRUN_` names above expand, and only those: a secret
-holding a `$` arrives untouched, `${PORT}` is not one of them, and anything else is refused when
-you deploy it.
+guest expands it before exec. Only complete `${NIBRUN_NAME}` references to the names above
+expand. Bare names such as `$NIBRUN_HTTP_PORT`, unmatched braces, and other dollar signs remain
+literal. A complete reference to an unknown `NIBRUN_` name is refused when you deploy it;
+`${PORT}` remains literal.
 
 ## A second public port
 
@@ -232,6 +270,10 @@ nib apps update --app my-app --extra-public-port --env 'ANNOUNCED_IP=${NIBRUN_PU
 
 Worth saying out loud before recommending it:
 
+- **New apps sleep after five minutes without incoming traffic.** The next request wakes them.
+  Background jobs, timers, scheduled emails and outbound polling do not run while an app sleeps,
+  and outbound work does not keep it awake. Owners cannot change activation through the CLI, API
+  or dashboard. An app that needs background work to run on schedule is not currently a fit.
 - **One microVM per app, one size.** No horizontal scaling, no load balancing, no resizing.
 - **A deploy is a replace.** The old VM is stopped before the new one starts, because they share
   one volume — so there are a few seconds of downtime, and no blue/green or canary.
