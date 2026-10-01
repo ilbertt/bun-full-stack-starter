@@ -14,6 +14,7 @@ export interface IListUserFilesResult {
     content_type: IFileColumns["content_type"];
     storage_key: IFileColumns["storage_key"];
     created_at: IFileColumns["created_at"];
+    expires_at: IFileColumns["expires_at"];
 }
 
 /** Result of query `FindUserFile`. */
@@ -25,6 +26,14 @@ export interface IFindUserFileResult {
     content_type: IFileColumns["content_type"];
     storage_key: IFileColumns["storage_key"];
     created_at: IFileColumns["created_at"];
+    expires_at: IFileColumns["expires_at"];
+}
+
+/** Result of query `ListExpiredFiles`. */
+export interface IListExpiredFilesResult {
+    id: IFileColumns["id"];
+    user_id: IFileColumns["user_id"];
+    storage_key: IFileColumns["storage_key"];
 }
 
 /** Result of query `DeleteUserFile`. */
@@ -36,6 +45,7 @@ export interface Queries {
     CreateFile: ICreateFileResult;
     ListUserFiles: IListUserFilesResult;
     FindUserFile: IFindUserFileResult;
+    ListExpiredFiles: IListExpiredFilesResult;
     DeleteUserFile: IDeleteUserFileResult;
 }
 
@@ -130,6 +140,7 @@ export interface IFileColumns {
     content_type: string;
     storage_key: string;
     created_at: string;
+    expires_at: string | null;
 }
 
 /** Schema of `file`. */
@@ -230,9 +241,11 @@ export const schema = {
             size: { _columnName: "size", _foreignKeys: {} },
             content_type: { _columnName: "content_type", _foreignKeys: {} },
             storage_key: { _columnName: "storage_key", _foreignKeys: {} },
-            created_at: { _columnName: "created_at", _foreignKeys: {} }
+            created_at: { _columnName: "created_at", _foreignKeys: {} },
+            expires_at: { _columnName: "expires_at", _foreignKeys: {} }
         },
         _indexes: {
+            file_expires_at_idx: { _indexName: "file_expires_at_idx" },
             file_user_id_idx: { _indexName: "file_user_id_idx" },
             sqlite_autoindex_file_1: { _indexName: "sqlite_autoindex_file_1" },
             sqlite_autoindex_file_2: { _indexName: "sqlite_autoindex_file_2" }

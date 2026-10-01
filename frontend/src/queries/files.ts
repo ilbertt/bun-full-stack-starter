@@ -8,6 +8,8 @@ export type FileSummary = NonNullable<
 
 export const filesQueryOptions = queryOptions({
   queryKey: ['files'],
+  // A nibrun cron runs in a separate process, so its deletions do not reach this app's sockets.
+  refetchInterval: 60_000,
   queryFn: async () => {
     const { data, error } = await api.api.files.get();
     if (error) {

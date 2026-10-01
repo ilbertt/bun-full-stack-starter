@@ -63,6 +63,19 @@ export function FileUploadForm() {
         }}
       </api.Field>
 
+      <api.Field name="expire">
+        {(field) => (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={field.state.value}
+              onChange={(event) => field.handleChange(event.target.checked)}
+            />
+            Expire after 1 minute (removed by the next cleanup run)
+          </label>
+        )}
+      </api.Field>
+
       {error && (
         <p role="alert" className={ERROR_CLASS_NAME}>
           {error.message}

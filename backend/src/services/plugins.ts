@@ -16,7 +16,7 @@ const healthRepository = new HealthRepository(sql);
 
 const assetsService = new AssetsService(assetsRepository);
 const eventsService = new EventsService();
-const filesService = new FilesService({
+export const filesService = new FilesService({
   filesRepo: filesRepository,
   storage,
   events: eventsService,
