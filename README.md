@@ -87,6 +87,9 @@ await Bun.cron(entrypoint, '* * * * *', 'expire-files');
 
 In [startup.ts](./backend/src/startup.ts), this registers the current binary to run every minute.
 `main.ts` passes its `import.meta.path` as the entrypoint and leaves startup to that module.
+This template targets nibrun in production: set `NODE_ENV=production` on deployment, for example
+with `nib run ./backend/dist/app --name my-app --env NODE_ENV=production`. Other environments
+use the in-process callback, with `NODE_ENV` defaulting to `development`.
 nibrun accepts Bun's crontab registration, keeps the schedule on the host, and wakes a sleeping
 app when the job is due. Registering the same title again replaces the job, so restarting or
 redeploying does not add another copy. Inspect it with `nib apps crons --app <app-name>` or the

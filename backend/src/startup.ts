@@ -25,8 +25,8 @@ export async function startup(entrypoint: string): Promise<void> {
     return;
   }
 
-  if (process.env.NIBRUN_HOSTNAME) {
-    // nibrun accepts Bun's crontab registration and wakes the app for each scheduled run.
+  if (env.NODE_ENV === 'production') {
+    // Production targets nibrun, which accepts Bun's registration and wakes the app for each run.
     await Bun.cron(entrypoint, EXPIRATION_SCHEDULE, EXPIRATION_JOB);
   } else {
     // Local development needs no OS job installed; use Bun's in-process scheduler.
