@@ -9,7 +9,11 @@ const jobs = [
   {
     title: 'expire-files',
     schedule: '* * * * *',
-    run: () => filesService.expire(),
+    run: async () => {
+      logger.info('expire-files started');
+      await filesService.expire();
+      logger.info('expire-files completed');
+    },
   },
 ];
 
