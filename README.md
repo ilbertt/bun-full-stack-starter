@@ -82,17 +82,20 @@ sessions stay valid across them.
 Scheduling a job uses Bun's built-in API — no scheduler dependency or dashboard setup:
 
 ```ts
-await Bun.cron(import.meta.path, '* * * * *', 'expire-files');
+await Bun.cron(entrypoint, '* * * * *', 'expire-files');
 ```
 
-In [main.ts](./backend/src/main.ts), this registers the current binary to run every minute.
+In [startup.ts](./backend/src/startup.ts), this registers the current binary to run every minute.
+`main.ts` passes its `import.meta.path` as the entrypoint and leaves startup to that module.
 nibrun accepts Bun's crontab registration, keeps the schedule on the host, and wakes a sleeping
 app when the job is due. Registering the same title again replaces the job, so restarting or
 redeploying does not add another copy. Inspect it with `nib apps crons --app <app-name>` or the
 dashboard's Crons tab.
 
 Each run starts a separate process of the same binary with `--cron-title=expire-files`. The
-entrypoint recognizes that argument, runs the cleanup service, and exits before starting HTTP.
+startup module recognizes that argument, runs the cleanup service, and exits before starting HTTP.
+Bun 1.4.2 calls a `scheduled()` export for source scripts, but its compiled runtime passes these
+arguments to the application instead, so the single-binary build needs this small dispatch check.
 The database and uploads stay on the same persistent disk. Locally, the app uses the callback
 form, `Bun.cron('* * * * *', () => filesService.expire())`, without installing an OS job.
 See [Bun's cron documentation](https://bun.com/docs/runtime/cron) for both forms.
