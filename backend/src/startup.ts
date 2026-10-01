@@ -4,36 +4,17 @@ import { createLogger } from '#lib/logger.ts';
 import { MAX_REQUEST_BODY_SIZE_BYTES } from '#lib/uploads.ts';
 
 const logger = createLogger('startup');
-const EXPIRATION_SCHEDULE = '* * * * *';
-const EXPIRATION_JOB = 'expire-files';
 
 export async function startup(entrypoint: string): Promise<void> {
   await runMigrations();
 
-  // Import the services dynamically to let the migrations run first.
-  const { filesService } = await import('#services/plugins.ts');
-
-  // Bun 1.4.2's compiled runtime does not call a scheduled() export. Its cron command
-  // passes these arguments to the entrypoint, so dispatch here before starting HTTP.
-  if (process.argv.includes(`--cron-title=${EXPIRATION_JOB}`)) {
-    const { sql } = await import('#db/client.ts');
-    try {
-      await filesService.expire();
-    } finally {
-      await sql.close();
-    }
+  // Cron jobs import services, so load them only after migrations have run.
+  const { registerCrons, runCronJob } = await import('#crons.ts');
+  if (await runCronJob()) {
     return;
   }
 
-  if (env.NODE_ENV === 'production') {
-    // Production targets nibrun, which accepts Bun's registration and wakes the app for each run.
-    await Bun.cron(entrypoint, EXPIRATION_SCHEDULE, EXPIRATION_JOB);
-  } else {
-    // Local development needs no OS job installed; use Bun's in-process scheduler.
-    Bun.cron(EXPIRATION_SCHEDULE, () =>
-      filesService.expire().catch((error) => logger.error('file expiration failed', error)),
-    );
-  }
+  await registerCrons(entrypoint);
 
   const { createApp } = await import('#app.ts');
   const { server } = createApp().listen({

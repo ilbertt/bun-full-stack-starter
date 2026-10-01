@@ -85,8 +85,9 @@ Scheduling a job uses Bun's built-in API — no scheduler dependency or dashboar
 await Bun.cron(entrypoint, '* * * * *', 'expire-files');
 ```
 
-In [startup.ts](./backend/src/startup.ts), this registers the current binary to run every minute.
-`main.ts` passes its `import.meta.path` as the entrypoint and leaves startup to that module.
+Job definitions live in [crons.ts](./backend/src/crons.ts), alongside registration and dispatch.
+`main.ts` passes its `import.meta.path` to `startup.ts`, which runs migrations, delegates cron
+work to that module, and starts HTTP for a normal server invocation.
 This template targets nibrun in production. The build command sets `NODE_ENV=production` and
 embeds it into the binary, so deployment needs no `NODE_ENV` configuration. Source runs default
 to `development` and use the in-process callback.
@@ -96,7 +97,7 @@ redeploying does not add another copy. Inspect it with `nib apps crons --app <ap
 dashboard's Crons tab.
 
 Each run starts a separate process of the same binary with `--cron-title=expire-files`. The
-startup module recognizes that argument, runs the cleanup service, and exits before starting HTTP.
+cron module recognizes that argument, runs the cleanup service, and exits before starting HTTP.
 Bun 1.4.2 calls a `scheduled()` export for source scripts, but its compiled runtime passes these
 arguments to the application instead, so the single-binary build needs this small dispatch check.
 The database and uploads stay on the same persistent disk. Locally, the app uses the callback
