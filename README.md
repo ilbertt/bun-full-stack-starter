@@ -86,8 +86,8 @@ await Bun.cron(entrypoint, '* * * * *', 'expire-files');
 ```
 
 Job definitions live in [crons.ts](./backend/src/crons.ts), alongside registration and dispatch.
-`main.ts` passes its `import.meta.path` to `startup.ts`, which runs migrations, delegates cron
-work to that module, and starts HTTP for a normal server invocation.
+`main.ts` runs migrations, delegates cron work to that module, and starts HTTP for a normal
+server invocation. It passes its `import.meta.path` when registering the current binary.
 This template targets nibrun in production. The build command sets `NODE_ENV=production` and
 embeds it into the binary, so deployment needs no `NODE_ENV` configuration. Source runs default
 to `development` and use the in-process callback.
