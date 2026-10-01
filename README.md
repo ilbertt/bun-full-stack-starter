@@ -96,6 +96,9 @@ app when the job is due. Registering the same title again replaces the job, so r
 redeploying does not add another copy. Inspect it with `nib apps crons --app <app-name>` or the
 dashboard's Crons tab.
 
+Cron runs count as activity on nibrun, so this demo's every-minute schedule keeps the app awake.
+Use a longer interval to let it sleep between runs.
+
 Each run starts a separate process of the same binary with `--cron-title=expire-files`. The
 cron module recognizes that argument, runs the cleanup service, and exits before starting HTTP.
 Bun 1.4.2 calls a `scheduled()` export for source scripts, but its compiled runtime passes these
