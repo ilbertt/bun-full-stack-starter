@@ -88,9 +88,9 @@ await Bun.cron(entrypoint, '* * * * *', 'expire-files');
 Job definitions live in [crons.ts](./backend/src/crons.ts), alongside registration and dispatch.
 `main.ts` runs migrations, delegates cron work to that module, and starts HTTP for a normal
 server invocation. It passes its `import.meta.path` when registering the current binary.
-This template targets nibrun in production. The build command sets `NODE_ENV=production` and
-embeds it into the binary, so deployment needs no `NODE_ENV` configuration. Source runs default
-to `development` and use the in-process callback.
+This template targets nibrun in production. `NODE_ENV` is a runtime environment variable that
+defaults to `production`, so deployment needs no extra setting. `bun run dev` explicitly sets
+`NODE_ENV=development` and uses the in-process callback.
 nibrun accepts Bun's crontab registration, keeps the schedule on the host, and wakes a sleeping
 app when the job is due. Registering the same title again replaces the job, so restarting or
 redeploying does not add another copy. Inspect it with `nib apps crons --app <app-name>` or the

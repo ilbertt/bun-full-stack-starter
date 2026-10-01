@@ -48,8 +48,7 @@ function loadEnv(): Env {
   ensureDir(dataFolder);
 
   return {
-    // A direct access lets the build replace this with its production value.
-    NODE_ENV: process.env.NODE_ENV || 'development',
+    NODE_ENV: optional({ name: 'NODE_ENV', defaultValue: 'production' }),
     PORT: Number(optional({ name: 'PORT', defaultValue: DEFAULT_PORT })),
     BASE_URL: new URL(optional({ name: 'BASE_URL', defaultValue: defaultBaseUrl() })),
     DATA_FOLDER: dataFolder,
