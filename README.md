@@ -59,7 +59,7 @@ frontend itself.
   subset of `Bun.S3Client` — and a compile-time assertion keeps it that way — so moving to real
   object storage is one line in `backend/src/lib/storage/client.ts`.
 - **Scheduled file expiration.** Check “Expire after 1 minute” when uploading a file. A
-  `Bun.cron` job removes its metadata and bytes on the next minute boundary after expiry.
+  `Bun.cron` job runs every 10 minutes and removes expired files' metadata and bytes.
   Unchecked uploads and existing files have no expiration.
 - **The server serves the SPA.** Every built file is registered as its own native static route, so
   Bun answers `If-None-Match` with a `304` on its own and the hashed assets are `immutable` for a
@@ -82,7 +82,7 @@ sessions stay valid across them.
 Scheduling a job uses Bun's built-in API — no scheduler dependency or dashboard setup:
 
 ```ts
-await Bun.cron(entrypoint, '* * * * *', 'expire-files');
+await Bun.cron(entrypoint, '*/10 * * * *', 'expire-files');
 ```
 
 Job definitions live in [crons.ts](./backend/src/crons.ts), alongside registration and dispatch.
@@ -96,15 +96,16 @@ app when the job is due. Registering the same title again replaces the job, so r
 redeploying does not add another copy. Inspect it with `nib apps crons --app <app-name>` or the
 dashboard's Crons tab.
 
-Cron runs count as activity on nibrun, so this demo's every-minute schedule keeps the app awake.
-Use a longer interval to let it sleep between runs.
+Cron runs count as activity on nibrun. This demo runs every 10 minutes so the app can sleep
+after five minutes without activity, then wake for the next job. Close the Files page to observe
+this: its automatic refresh keeps the app active while it is open.
 
 Each run starts a separate process of the same binary with `--cron-title=expire-files`. The
 cron module recognizes that argument, runs the cleanup service, and exits before starting HTTP.
 Bun 1.4.2 calls a `scheduled()` export for source scripts, but its compiled runtime passes these
 arguments to the application instead, so the single-binary build needs this small dispatch check.
 The database and uploads stay on the same persistent disk. Locally, the app uses the callback
-form, `Bun.cron('* * * * *', () => filesService.expire())`, without installing an OS job.
+form, `Bun.cron('*/10 * * * *', () => filesService.expire())`, without installing an OS job.
 See [Bun's cron documentation](https://bun.com/docs/runtime/cron) for both forms.
 
 The Files page refreshes every minute to pick up deletions made by the separate cron process;

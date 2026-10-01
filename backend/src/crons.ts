@@ -8,7 +8,7 @@ const logger = createLogger('crons');
 const jobs = [
   {
     title: 'expire-files',
-    schedule: '* * * * *',
+    schedule: '*/10 * * * *',
     run: async () => {
       logger.info('expire-files started');
       await filesService.expire();
