@@ -40,6 +40,8 @@ const buildResult = await Bun.build({
     asset: '[dir]/[name].[ext]',
   },
   define: {
+    // Bake the build command's environment into the binary; deployment needs no NODE_ENV.
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
     // Update the dev script when updating these
     [PUBLIC_FRONTEND_DIR_NAME_CONSTANT_NAME]: JSON.stringify(PUBLIC_FRONTEND_DIR_NAME),
     [DB_MIGRATIONS_DIR_NAME_CONSTANT_NAME]: JSON.stringify(DB_MIGRATIONS_DIR_NAME),
