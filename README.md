@@ -79,38 +79,14 @@ sessions stay valid across them.
 
 ### Cron jobs on nibrun
 
-Scheduling a job uses Bun's built-in API — no scheduler dependency or dashboard setup:
+Schedule jobs with `Bun.cron`; nibrun wakes the app when they are due:
 
 ```ts
 await Bun.cron(entrypoint, '*/10 * * * *', 'expire-files');
 ```
 
-Job definitions live in [crons.ts](./backend/src/crons.ts), alongside registration and dispatch.
-`main.ts` runs migrations, delegates cron work to that module, and starts HTTP for a normal
-server invocation. It passes its `import.meta.path` when registering the current binary.
-This template targets nibrun in production. `NODE_ENV` is a runtime environment variable that
-defaults to `production`, so deployment needs no extra setting. `bun run dev` explicitly sets
-`NODE_ENV=development` and uses the in-process callback.
-nibrun accepts Bun's crontab registration, keeps the schedule on the host, and wakes a sleeping
-app when the job is due. Registering the same title again replaces the job, so restarting or
-redeploying does not add another copy. Inspect it with `nib apps crons --app <app-name>` or the
-dashboard's Crons tab.
-
-Cron runs count as activity on nibrun. This demo runs every 10 minutes so the app can sleep
-after five minutes without activity, then wake for the next job. Close the Files page to observe
-this: its automatic refresh keeps the app active while it is open.
-
-Each run starts a separate process of the same binary with `--cron-title=expire-files`. The
-cron module recognizes that argument, runs the cleanup service, and exits before starting HTTP.
-Bun 1.4.2 calls a `scheduled()` export for source scripts, but its compiled runtime passes these
-arguments to the application instead, so the single-binary build needs this small dispatch check.
-The database and uploads stay on the same persistent disk. Locally, the app uses the callback
-form, `Bun.cron('*/10 * * * *', () => filesService.expire())`, without installing an OS job.
-See [Bun's cron documentation](https://bun.com/docs/runtime/cron) for both forms.
-
-The Files page refreshes every minute to pick up deletions made by the separate cron process;
-local cleanup also sends the existing `file.deleted` websocket event. This is a cleanup demo:
-expired files remain downloadable until that cleanup runs.
+This template cleans up expired files every 10 minutes. Jobs live in
+[crons.ts](./backend/src/crons.ts), and each run logs to the dashboard.
 
 For a versioned binary, run the **release** workflow from the Actions tab. It builds the linux x64
 binary, tags the commit it ran on with the date — `v2026.9.9-1`, and a second cut that day is `-2`
