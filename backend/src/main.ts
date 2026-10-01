@@ -5,15 +5,17 @@ import { MAX_REQUEST_BODY_SIZE_BYTES } from '#lib/uploads.ts';
 
 await runMigrations();
 
-// Import the app dynamically to let the migrations run first.
-const { createApp } = await import('#app.ts');
+// Cron jobs import services, so load them only after migrations have run.
+const { registerCrons, runCronJob } = await import('#crons.ts');
+if (!(await runCronJob())) {
+  await registerCrons(import.meta.path);
 
-const logger = createLogger('main');
+  const { createApp } = await import('#app.ts');
+  const { server } = createApp().listen({
+    port: env.PORT,
+    hostname: '0.0.0.0',
+    maxRequestBodySize: MAX_REQUEST_BODY_SIZE_BYTES,
+  });
 
-const { server } = createApp().listen({
-  port: env.PORT,
-  hostname: '0.0.0.0',
-  maxRequestBodySize: MAX_REQUEST_BODY_SIZE_BYTES,
-});
-
-logger.info(`listening on ${server!.url.origin}`);
+  createLogger('main').info(`listening on ${server!.url.origin}`);
+}

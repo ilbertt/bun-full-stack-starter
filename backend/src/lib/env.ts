@@ -4,6 +4,7 @@ import { ensureDir } from '#lib/filesystem.ts';
 
 interface CustomProcessEnv {
   // Entries here must match the .env file
+  readonly NODE_ENV?: string;
   readonly PORT?: string;
   readonly BASE_URL?: string;
   readonly DATA_FOLDER?: string;
@@ -35,6 +36,7 @@ function optional({
 }
 
 type Env = {
+  NODE_ENV: string;
   PORT: number;
   BASE_URL: URL;
   DATA_FOLDER: string;
@@ -46,6 +48,7 @@ function loadEnv(): Env {
   ensureDir(dataFolder);
 
   return {
+    NODE_ENV: optional({ name: 'NODE_ENV', defaultValue: 'production' }),
     PORT: Number(optional({ name: 'PORT', defaultValue: DEFAULT_PORT })),
     BASE_URL: new URL(optional({ name: 'BASE_URL', defaultValue: defaultBaseUrl() })),
     DATA_FOLDER: dataFolder,

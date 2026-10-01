@@ -7,6 +7,8 @@ import type { FilesRepository } from '#repositories/files.repository.ts';
 import type { EventsService } from '#services/events.service.ts';
 import { Service } from '#services/service.ts';
 
+const FILE_EXPIRATION_MS = 60_000;
+
 export class FilesService extends Service {
   private readonly filesRepo: FilesRepository;
   private readonly storage: StorageClient;
@@ -27,8 +29,17 @@ export class FilesService extends Service {
     this.events = events;
   }
 
-  async upload({ userId, file }: { userId: string; file: File }): Promise<FileRecord> {
+  async upload({
+    userId,
+    file,
+    expire = false,
+  }: {
+    userId: string;
+    file: File;
+    expire?: boolean;
+  }): Promise<FileRecord> {
     const id = uuidv7();
+    const now = new Date();
     const record: FileRecord = {
       id,
       user_id: userId,
@@ -36,7 +47,8 @@ export class FilesService extends Service {
       size: file.size,
       content_type: file.type,
       storage_key: this.storageKeyOf({ userId, fileId: id, fileName: file.name }),
-      created_at: new Date().toISOString(),
+      created_at: now.toISOString(),
+      expires_at: expire ? new Date(now.getTime() + FILE_EXPIRATION_MS).toISOString() : null,
     };
 
     await this.storage.write(record.storage_key, file);
@@ -86,6 +98,31 @@ export class FilesService extends Service {
     await this.storage.delete(storageKey);
     this.logger.info(`removed file ${fileId}`);
     this.events.publish({ userId, event: { type: 'file.deleted', fileId } });
+  }
+
+  async expire(): Promise<void> {
+    const files = await this.filesRepo.listExpired(new Date().toISOString());
+    for (const file of files) {
+      try {
+        // Keep the row until the bytes are gone so a failed cleanup can retry next minute.
+        if (await this.storage.exists(file.storage_key)) {
+          await this.storage.delete(file.storage_key);
+        }
+        const removed = await this.filesRepo.deleteForUser({
+          fileId: file.id,
+          userId: file.user_id,
+        });
+        if (removed) {
+          this.logger.info(`expired file ${file.id}`);
+          this.events.publish({
+            userId: file.user_id,
+            event: { type: 'file.deleted', fileId: file.id },
+          });
+        }
+      } catch (error) {
+        this.logger.error(`could not expire file ${file.id}`, error);
+      }
+    }
   }
 
   private storageKeyOf({

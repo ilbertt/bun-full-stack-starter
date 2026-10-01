@@ -58,6 +58,9 @@ frontend itself.
   streamed off disk by Bun with Range requests included. `Storage` is deliberately a structural
   subset of `Bun.S3Client` — and a compile-time assertion keeps it that way — so moving to real
   object storage is one line in `backend/src/lib/storage/client.ts`.
+- **Scheduled file expiration.** Check “Expire after 1 minute” when uploading a file. A
+  `Bun.cron` job runs every 10 minutes and removes expired files' metadata and bytes.
+  Unchecked uploads and existing files have no expiration.
 - **The server serves the SPA.** Every built file is registered as its own native static route, so
   Bun answers `If-None-Match` with a `304` on its own and the hashed assets are `immutable` for a
   year. Anything that matches no file and doesn't look like an API call falls back to `index.html`.
@@ -73,6 +76,17 @@ there — nibrun injects `NIBRUN_HOSTNAME`, and the app takes `https://<that hos
 public origin — the origin better-auth trusts and builds its URLs from. `BETTER_AUTH_SECRET` can
 stay unset too: the generated one lands on that persistent disk, so it survives redeploys and
 sessions stay valid across them.
+
+### Cron jobs on nibrun
+
+Schedule jobs with `Bun.cron`; nibrun wakes the app when they are due:
+
+```ts
+await Bun.cron(entrypoint, '*/10 * * * *', 'expire-files');
+```
+
+This template cleans up expired files every 10 minutes. Jobs live in
+[crons.ts](./backend/src/crons.ts), and each run logs to the dashboard.
 
 For a versioned binary, run the **release** workflow from the Actions tab. It builds the linux x64
 binary, tags the commit it ran on with the date — `v2026.9.9-1`, and a second cut that day is `-2`

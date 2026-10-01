@@ -43,6 +43,7 @@ export function FilesList() {
               <p className={META_CLASS_NAME}>
                 {formatBytes(file.size)} · {file.contentType || 'unknown type'} ·{' '}
                 {file.createdAt.toLocaleString()}
+                {file.expiresAt && ` · Expires ${file.expiresAt.toLocaleString()}`}
               </p>
             </div>
             {/* An anchor, not the Eden client, which reads unrecognised content types with

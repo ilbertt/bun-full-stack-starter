@@ -9,7 +9,7 @@
     "./types": "./src/types.ts"
   },
   "scripts": {
-    "dev": "bun run scripts/dev.ts",
+    "dev": "NODE_ENV=development bun run scripts/dev.ts",
     "build": "bun run scripts/build.ts",
     "release:prepare": "bun run scripts/prepare-release.ts",
     "check:types": "bun run check:queries && bun run --bun tsc -b",

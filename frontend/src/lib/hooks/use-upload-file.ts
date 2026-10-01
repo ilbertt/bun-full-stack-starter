@@ -5,14 +5,15 @@ import { apiErrorMessage } from '../api-error';
 
 type UploadFileVariables = {
   file: File;
+  expire: boolean;
 };
 
 export function useUploadFile(): UseMutationResult<void, Error, UploadFileVariables> {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ file }: UploadFileVariables) => {
-      const { error } = await api.api.files.post({ file });
+    mutationFn: async ({ file, expire }: UploadFileVariables) => {
+      const { error } = await api.api.files.post({ file, expire });
       if (error) {
         throw new Error(apiErrorMessage(error));
       }

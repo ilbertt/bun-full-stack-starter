@@ -10,12 +10,14 @@ export const FileSchema = t.Object({
   // `t.Date()` rather than the `t.String()` the column holds: Eden revives a date-shaped string
   // into a `Date` whatever the schema says, so `t.String()` promises one the client never gets.
   createdAt: t.Date(),
+  expiresAt: t.Nullable(t.Date()),
 });
 
 // `t.Object` rather than `t.Form`, whose static type is a branded `FormData` the frontend could
-// only build by importing Elysia. This types as `{ file: File }` on both ends.
+// only build by importing Elysia. Multipart booleans arrive as strings; BooleanString decodes them.
 export const UploadFileBodySchema = t.Object({
   file: t.File({ maxSize: MAX_UPLOAD_SIZE }),
+  expire: t.Optional(t.BooleanString()),
 });
 
 export const FileParamsSchema = t.Object({
@@ -34,5 +36,6 @@ export function toFileResponse(record: FileRecord) {
     size: record.size,
     contentType: record.content_type,
     createdAt: new Date(record.created_at),
+    expiresAt: record.expires_at ? new Date(record.expires_at) : null,
   };
 }

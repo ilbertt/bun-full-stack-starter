@@ -11,6 +11,7 @@ const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_MEGABYTES * BYTES_IN_A_MEGABYTE;
 
 export type FileUploadFormValues = {
   file: File | undefined;
+  expire: boolean;
 };
 
 export type FileUploadFormApi = ReactFormExtendedApi<
@@ -37,6 +38,7 @@ export type FileUploadFormState = {
 
 const UNTOUCHED: FileUploadFormValues = {
   file: undefined,
+  expire: false,
 };
 
 // The server is authoritative, but Bun refuses an over-sized body at the socket before any
@@ -62,7 +64,7 @@ export function useFileUploadForm(): FileUploadFormState {
       }
 
       uploadFile.mutate(
-        { file: value.file },
+        { file: value.file, expire: value.expire },
         {
           onSuccess: () => {
             formApi.reset();

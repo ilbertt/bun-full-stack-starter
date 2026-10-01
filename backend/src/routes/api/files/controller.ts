@@ -24,14 +24,18 @@ export const FilesController = new Elysia()
     '/files',
     async ({ body, user, filesService, logger, status }) => {
       logger.info(`uploading ${body.file.name}`);
-      const record = await filesService.upload({ userId: user.id, file: body.file });
+      const record = await filesService.upload({
+        userId: user.id,
+        file: body.file,
+        expire: body.expire,
+      });
       return status(StatusMap.Created, toFileResponse(record));
     },
     {
       detail: {
         tags: ['Files'],
         summary: 'Upload a file',
-        description: `Stores a file of up to ${MAX_UPLOAD_SIZE_MEGABYTES} MB and returns its metadata.`,
+        description: `Stores a file of up to ${MAX_UPLOAD_SIZE_MEGABYTES} MB. Set expire to true to delete it after one minute, on the next cleanup run.`,
       },
       // The one content type this accepts, and the one the docs page then offers: without it
       // the spec advertises JSON and urlencoded too, which the handler would reject.
