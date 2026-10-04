@@ -4,7 +4,7 @@ A template to build on, not a library to depend on: clone it, rename it, delete 
 need. An Elysia API and a React SPA in one Bun workspace, compiled to a single binary that
 carries the built frontend and the SQL migrations inside it.
 
-The root `package.json` pins Bun in `packageManager` for CI and cross-compilation.
+The root `package.json` pins Bun in `packageManager` for CI.
 The app runs on Bun throughout; `engines.node` explicitly says to use Bun instead of Node.
 
 ## Backend
