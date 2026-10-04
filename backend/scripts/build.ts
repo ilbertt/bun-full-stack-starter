@@ -1,4 +1,5 @@
 import { cp, rm } from 'node:fs/promises';
+import rootPackageJson from '../../package.json' with { type: 'json' };
 import {
   BACKEND_BINARY_FILE,
   BACKEND_BUILD_TARGET,
@@ -12,6 +13,10 @@ import {
   PUBLIC_FRONTEND_DIR_NAME,
   PUBLIC_FRONTEND_DIR_NAME_CONSTANT_NAME,
 } from './shared/constants';
+
+// Pin the embedded runtime to packageManager, even when the build runs on a different Bun.
+// Versioned compile targets are supported at runtime but absent from Bun's type definition.
+const bunVersion = rootPackageJson.packageManager.replace(/^bun@/, '');
 
 console.log('🧹 Cleaning dist dir...');
 await rm(BACKEND_DIST_DIR, { recursive: true, force: true });
@@ -28,7 +33,9 @@ const buildResult = await Bun.build({
   compile: {
     outfile: BACKEND_BINARY_FILE,
     // omitted entirely (not set to undefined) so Bun falls back to the host platform
-    ...(BACKEND_BUILD_TARGET ? { target: BACKEND_BUILD_TARGET } : {}),
+    ...(BACKEND_BUILD_TARGET
+      ? { target: `${BACKEND_BUILD_TARGET}-v${bunVersion}` as Bun.Build.CompileTarget }
+      : {}),
     assets: [FRONTEND_DIST_DST, DB_MIGRATIONS_DIR],
   },
   // Compiles the entrypoint to JSC bytecode so the binary skips parsing on every boot.
