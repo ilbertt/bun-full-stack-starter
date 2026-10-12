@@ -124,12 +124,6 @@
         "arguments": ["lsp-proxy"]
       }
     },
-    "vtsls": {
-      "binary": {
-        "path": "./node_modules/.bin/tsc",
-        "arguments": ["--lsp", "--stdio"]
-      }
-    },
     "tailwindcss-language-server": {
       "settings": {
         "classFunctions": ["clsx", "cva", "cn", "tw"]

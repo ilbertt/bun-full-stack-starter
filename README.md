@@ -29,6 +29,10 @@ The backend comes up on `:3000` and Vite on `:5173`, proxying `/api` to it — s
 ever talks to one origin, the same arrangement as production, where the backend serves the
 frontend itself.
 
+Run `bun check:all` to check formatting, generated SQL query types, and the backend and
+frontend types with Bun's built-in `bun check`. These checks need no separate TypeScript compiler;
+editors use their own TypeScript language server.
+
 ## Features
 
 - **One binary.** The frontend and the migrations are embedded, and the entrypoint is compiled to

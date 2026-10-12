@@ -15,7 +15,6 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "js/ts.experimental.useTsgo": true,
-  "js/ts.tsdk.path": "./node_modules/typescript",
   "prettier.enable": false,
   "eslint.enable": false,
   "json.schemaDownload.trustedDomains": {

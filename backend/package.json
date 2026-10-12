@@ -12,7 +12,7 @@
     "dev": "NODE_ENV=development bun run scripts/dev.ts",
     "build": "bun run scripts/build.ts",
     "release:prepare": "bun run scripts/prepare-release.ts",
-    "check:types": "bun run check:queries && bun run --bun tsc -b",
+    "check:types": "bun run check:queries && bun check -b",
     "check:queries": "bun run db:gen --check",
     "db:gen": "bun run --bun bun-sqlgen generate 'src/**/*.ts' --migrations src/db/migrations --out src/db/queries.gen.ts --dialect sqlite"
   },
@@ -26,7 +26,6 @@
   },
   "devDependencies": {
     "@better-auth/cli": "^1.4.22",
-    "openapi-types": "^12.1.3",
-    "typescript": "catalog:"
+    "openapi-types": "^12.1.3"
   }
 }
