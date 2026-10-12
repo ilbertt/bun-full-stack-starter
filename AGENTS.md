@@ -5,6 +5,9 @@ need. An Elysia API and a React SPA in one Bun workspace, compiled to a single b
 carries the built frontend and the SQL migrations inside it.
 
 The root `package.json` pins Bun in `packageManager` for CI.
+It also pins the TypeScript package used by editor language servers and CI's reference check.
+Keep that exact version aligned with `bun -p process.versions.typescript` when upgrading Bun;
+CI checks the versions match. Editor settings must use the workspace language server.
 The app runs on Bun throughout; `engines.node` explicitly says to use Bun instead of Node.
 
 ## Backend

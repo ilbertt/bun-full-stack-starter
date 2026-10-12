@@ -30,8 +30,16 @@ ever talks to one origin, the same arrangement as production, where the backend 
 frontend itself.
 
 Run `bun check:all` to check formatting, generated SQL query types, and the backend and
-frontend types with Bun's built-in `bun check`. These checks need no separate TypeScript compiler;
-editors use their own TypeScript language server.
+frontend types with `bun check` and the pinned workspace TypeScript checker. TypeScript 7.0.2
+also provides the editor language server, matching Bun 1.4.3's checker version; CI rejects a
+version mismatch. Keep the TypeScript pin aligned with `bun -p process.versions.typescript`
+when upgrading Bun.
+
+For editor diagnostics, install the recommended **TypeScript 7** extension in VS Code or the
+**TypeScript Language Server** (`tsgo`) extension in Zed. The checked-in settings make both
+use the workspace TypeScript package installed by `bun install`, rather than an editor's
+bundled version. Other editors can use `bun run --bun node_modules/typescript/bin/tsc --lsp --stdio`
+from the repo root to start the same language server.
 
 ## Features
 

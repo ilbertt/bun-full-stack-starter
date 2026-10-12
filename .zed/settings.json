@@ -3,7 +3,8 @@
   "languages": {
     "JavaScript": {
       "language_servers": [
-        "vtsls",
+        "typescript-ls",
+        "!vtsls",
         "biome",
         "tailwindcss-language-server",
         "!typescript-language-server",
@@ -22,7 +23,8 @@
     },
     "TypeScript": {
       "language_servers": [
-        "vtsls",
+        "typescript-ls",
+        "!vtsls",
         "biome",
         "tailwindcss-language-server",
         "!typescript-language-server",
@@ -41,7 +43,8 @@
     },
     "TSX": {
       "language_servers": [
-        "vtsls",
+        "typescript-ls",
+        "!vtsls",
         "biome",
         "tailwindcss-language-server",
         "!typescript-language-server",
@@ -118,6 +121,12 @@
     }
   },
   "lsp": {
+    "typescript-ls": {
+      "binary": {
+        "path": "./node_modules/.bin/tsc",
+        "arguments": ["--lsp", "--stdio"]
+      }
+    },
     "biome": {
       "binary": {
         "path": "./node_modules/.bin/biome",
