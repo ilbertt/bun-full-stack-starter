@@ -1,5 +1,5 @@
 const { version } = await Bun.file(
-  new URL('../../node_modules/typescript/package.json', import.meta.url),
+  new URL('../node_modules/typescript/package.json', import.meta.url),
 ).json();
 
 if (version !== process.versions.typescript) {
