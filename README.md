@@ -29,18 +29,6 @@ The backend comes up on `:3000` and Vite on `:5173`, proxying `/api` to it — s
 ever talks to one origin, the same arrangement as production, where the backend serves the
 frontend itself.
 
-Run `bun check:all` to check formatting, generated SQL query types, and the backend and
-frontend types with `bun check`. TypeScript 7.0.2 provides the editor language server, matching
-Bun 1.4.3's checker version. `bun check:typescript-version` runs before the type checks locally
-and in CI to reject a version mismatch. Keep the TypeScript pin aligned with
-`bun -p process.versions.typescript` when upgrading Bun.
-
-For editor diagnostics, install the recommended **TypeScript 7** extension in VS Code or the
-**TypeScript Language Server** (`tsgo`) extension in Zed. The checked-in settings make both
-use the workspace TypeScript package installed by `bun install`, rather than an editor's
-bundled version. Other editors can use `bun run --bun node_modules/typescript/bin/tsc --lsp --stdio`
-from the repo root to start the same language server.
-
 ## Features
 
 - **One binary.** The frontend and the migrations are embedded, and the entrypoint is compiled to
