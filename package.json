@@ -8,8 +8,7 @@
       "backend"
     ],
     "catalog": {
-      "better-auth": "1.7.7",
-      "typescript": "^7.0.2"
+      "better-auth": "1.7.7"
     }
   },
   "scripts": {
@@ -22,7 +21,8 @@
     "dev": "bun run --parallel --no-orphans backend:dev frontend:dev",
     "build": "bun frontend:build && bun backend:build",
     "build:local": "BUILD_TARGET=host bun run build",
-    "check:types": "bun --filter \"*\" check:types",
+    "check:typescript-version": "bun run --check scripts/check-typescript-version.ts",
+    "check:types": "bun run check:typescript-version && bun --filter \"*\" check:types",
     "check:codestyle": "bun run --bun biome check",
     "check:all": "bun run --parallel check:types check:codestyle",
     "fix:codestyle": "bun run --bun biome check --write"
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@types/bun": "1.4.3",
-    "typescript": "catalog:"
+    "typescript": "7.0.2"
   },
   "engines": {
     "node": "please use bun"
