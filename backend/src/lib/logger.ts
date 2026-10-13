@@ -1,11 +1,11 @@
 const RESET = '\x1b[0m';
 const LABEL_WIDTH = 5;
 
-const LEVEL_STYLES: Record<string, string> = {
-  debug: '\x1b[36m', // cyan
-  info: '\x1b[32m', // green
-  warn: '\x1b[33m', // yellow
-  error: '\x1b[31m', // red
+const LEVEL_STYLES = {
+  debug: Bun.color('cyan', 'ansi'),
+  info: Bun.color('green', 'ansi'),
+  warn: Bun.color('yellow', 'ansi'),
+  error: Bun.color('red', 'ansi'),
 };
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -21,7 +21,7 @@ function write({
 }): void {
   const ts = new Date().toISOString();
   const style = LEVEL_STYLES[level] ?? '';
-  const tag = `${style}${level.toUpperCase().padEnd(LABEL_WIDTH)}${RESET}`;
+  const tag = `${style}${level.toUpperCase().padEnd(LABEL_WIDTH)}${style ? RESET : ''}`;
   const out = level === 'error' ? console.error : console.log;
   const head = prefix ? `${ts} ${tag} [${prefix}]` : `${ts} ${tag}`;
   out(head, ...args);
