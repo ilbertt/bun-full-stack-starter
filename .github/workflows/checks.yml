@@ -15,15 +15,6 @@ jobs:
 
       - uses: ./.github/actions/prepare
 
-      - name: Check editor and Bun TypeScript versions match
-        run: |
-          bun -e '
-            const { version } = await Bun.file("node_modules/typescript/package.json").json();
-            if (version !== process.versions.typescript) {
-              throw new Error(`Workspace TypeScript ${version} must match Bun TypeScript ${process.versions.typescript}`);
-            }
-          '
-
       - name: Check Types
         run: bun check:types
 

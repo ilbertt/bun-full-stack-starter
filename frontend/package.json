@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "bun --bun vite dev",
     "build": "bun --bun vite build",
-    "check:types": "bun check -b"
+    "check:types": "bun check"
   },
   "dependencies": {
     "@elysiajs/eden": "^1.4.9",
