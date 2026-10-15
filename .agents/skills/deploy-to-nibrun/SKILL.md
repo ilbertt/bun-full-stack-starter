@@ -13,6 +13,8 @@ need is below it: [copying an app](#copying-an-app), [the guest contract](#the-g
 [naming a runtime value](#naming-a-runtime-value), [a second public port](#a-second-public-port),
 [cron jobs](#cron-jobs), and [what nibrun does not do](#tradeoffs).
 
+For CI deployments, start at [GitHub Actions](#github-actions).
+
 ## 1. Sign in
 
 ```sh
@@ -94,12 +96,20 @@ fixtures a first run would otherwise have to write:
 nib run ./my-server --name my-app --data-folder ./seed
 ```
 
-It takes a folder, or a `.tar.gz` or `.zip` that already holds one — the zip Finder or Explorer
-made goes as it stands. Either way **the root of the archive becomes the root of `data/`**: a
-folder is packed from the inside, so `./seed/app.db` arrives as `/app/data/app.db`, and bundling
-the folder rather than its contents puts every file one directory deeper than the app looks. Up to
-1 GiB sent and 2 GiB unpacked, and only as the app is created: this and the app writing its own
-files are the whole of how anything gets onto the volume. A zip made anywhere but unix carries no
+`--data-folder` accepts a local folder, a `.tar.gz` or `.zip` file, or an HTTPS URL to either
+archive format. nibrun fetches remote archives directly, so there is no need to download them
+locally first. The URL must name the archive in its path and be reachable from nibrun; signed
+query strings work, so quote URLs that contain them:
+
+```sh
+nib run ./my-server --name my-app --data-folder 'https://example.com/seed.tar.gz'
+```
+
+For every source, **the root of the archive becomes the root of `data/`**: a folder is packed from
+the inside, so `./seed/app.db` arrives as `/app/data/app.db`, and bundling the folder rather than
+its contents puts every file one directory deeper than the app looks. Up to 1 GiB uploaded or
+fetched and 2 GiB unpacked, and only as the app is created: this and the app writing its own files
+are the whole of how anything gets onto the volume. A zip made anywhere but unix carries no
 permissions, so an executable bit does not survive one.
 
 ### Try seeding first-run setup before going public
@@ -176,6 +186,42 @@ Every option a deploy takes is listed by `nib run anything --help` — any word 
 the binary, because the help does not read it, and `nib run --help` on its own answers with the
 subcommand rather than the options. What is below is what `--help` does not say.
 
+### GitHub Actions
+
+Deploy an existing app without an API key or `nib login` in CI. Use a CLI release with GitHub
+OIDC support. After signing in locally, configure which workflow may deploy:
+
+```sh
+nib apps github-workflows set --app my-app --repository OWNER/REPO --workflow deploy.yml
+```
+
+Save this as `.github/workflows/deploy.yml`. Replace `./build.sh` with the repository’s build
+command, `./my-server` with its Linux x86_64 output, and `APP_ID` with the app ID from
+the setup command above:
+
+```yaml
+name: Deploy to nibrun
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: nibrunhq/setup-cli@v1
+      - run: ./build.sh
+      - run: nib run ./my-server --github-trusted-oidc --app-id APP_ID
+```
+
+Branch and tag runs of this workflow can deploy. The CLI exchanges GitHub identity for a
+temporary token scoped to this app. Deployments reuse its saved startup arguments and configuration. The command returns once the deployment is
+created, without waiting for it to serve. If the trust rule requires a GitHub environment,
+set `jobs.deploy.environment` to match.
+
 ## 4. Verify
 
 Serving is only a TCP connect, and a broken process can hold the port while answering nothing. So
@@ -192,9 +238,24 @@ complaining about. `nib --help` lists the rest — status, domains, filesystem, 
 ## Inspecting SQLite databases
 
 Read SQLite databases in an app's `data/` through the CLI or dashboard without downloading them.
+When a task calls for inspecting an app's database, use `nib apps sqlite` to discover its
+subcommands:
+
+```sh
+nib apps sqlite --help
+```
+
+Explore the subcommands and their `--help` to list saved connections, create a connection to
+the database file, and query it. Paths match `nib apps files ls`: `/app.db` names the guest's
+`/app/data/app.db`. Reuse a saved connection when available, or create one for the file the app
+actually uses. Pass `--app` and the saved `--connection` ID when querying; use `--json` for
+structured results. The app needs a running deployment. Queries read the actual database in
+the guest, including committed changes in its WAL.
+
 In the dashboard's **Files** tab, choose **Mark as SQLite database** from the file menu, then
-click the database file to open the explorer. Connections are read-only; the app can continue
-writing to its database.
+click the database file to open the explorer. Both CLI and dashboard connections are read-only:
+SQLite rejects data and schema writes, so an AI agent can explore without modifying the database.
+The app can continue writing to its database.
 
 ## Copying an app
 
